@@ -1,0 +1,103 @@
+---
+skill:
+  id: dotnet-code-refactor
+  name: .NET Code Refactor
+  version: 1.0.0
+  owner: Platform/Engineering
+  intent: >
+    Improve the maintainability, reliability, and observability of legacy VB.NET / ASP.NET
+    WebForms codebases without altering business logic. Removes dead code, enforces naming
+    conventions, replaces unstructured error handling with a domain exception hierarchy,
+    and wires Application Insights structured telemetry throughout the application.
+  recommended_agent: dotnet-code-refactor-agent
+  scope:
+    includes:
+      - Dead code removal and naming convention enforcement
+      - On Error Resume Next elimination and Try/Catch restructuring
+      - Domain exception hierarchy creation and generic catch replacement
+      - Global exception handler wiring in Global.asax
+      - Application Insights NuGet installation and TelemetryHelper setup
+      - EventLog.WriteEntry replacement with structured telemetry calls
+    excludes:
+      - Business logic changes of any kind
+      - Framework version upgrades (use dotnet-framework-upgrade skill)
+      - Authentication / identity changes (use identity-migration-dotnet skill)
+      - Auto-generated files (*.designer.vb, *.g.vb, AssemblyInfo.vb)
+      - Secret values — must never be written to any file
+  inputs_required:
+    - solutionFolder: "Absolute path to the repository root containing the .sln file"
+    - targetFramework: "Target framework moniker, e.g. net48"
+  outputs:
+    - App_Code/Exceptions/AppExceptions.vb
+    - App_Code/Logging/TelemetryHelper.vb
+    - ApplicationInsights.config
+    - docs/code-refactor/code-cleanup-report.json
+    - docs/code-refactor/exception-handling-report.json
+    - docs/code-refactor/logging-enhancement-report.json
+    - docs/code-refactor/build-output.log
+    - docs/code-refactor/conversion-report-<YYYY-MM-DD>.html
+    - All modified .vb source files (updated in place)
+  success_criteria:
+    - Zero On Error Resume Next statements remain in any .vb file
+    - Zero empty Catch blocks remain
+    - Zero EventLog.WriteEntry calls remain outside suppressing wrappers
+    - Global.asax Application_Error is wired and redirects to safe error pages
+    - TelemetryHelper is the sole logging entry point across the codebase
+    - Solution builds with zero errors after all changes
+  safety:
+    - Never change business logic or authorization outcomes.
+    - Never modify *.designer.vb, *.g.vb, or AssemblyInfo.vb files.
+    - Never write secret values (connection strings, keys, passwords) to any file.
+    - Never expose stack traces or SQL error messages in user-facing pages.
+    - Never suppress auth-related exceptions from OWIN, SAML, or Windows Auth middleware.
+---
+ 
+# .NET Code Refactor (Skill)
+ 
+This skill provides a structured, repeatable three-phase workflow to clean, harden, and
+instrument legacy VB.NET / ASP.NET WebForms codebases for Azure App Service hosting.
+Each phase must complete before the next begins.
+ 
+## When to use this skill
+Use this skill after `framework-upgrade` and `nuget-package-upgrade` have completed and
+the solution builds cleanly against the target framework. Do not use it on code that still
+contains unresolved build errors — fix the build first.
+ 
+## Execution Order
+ 
+Run the sub-skills in the following sequence — each depends on outputs from the previous:
+ 
+| Order | Skill file | Purpose |
+|---|---|---|
+| 1 | [code-cleanup-refactor.md](./code-cleanup-refactor.md) | Remove dead code, enforce naming, split large methods, eliminate `On Error Resume Next` |
+| 2 | [global-exception-handling.md](./global-exception-handling.md) | Define domain exception hierarchy, replace generic catches, wire `Application_Error` |
+| 3 | [appinsights-logging.md](./appinsights-logging.md) | Install Application Insights packages, create `TelemetryHelper`, replace all legacy logging |
+ 
+## Inputs
+ 
+| Input | Required | Description |
+|---|---|---|
+| `solutionFolder` | Yes | Absolute path to the repository root |
+| `targetFramework` | Yes | Target framework moniker (e.g. `net48`) |
+ 
+## Outputs
+ 
+| Output | Produced by |
+|---|---|
+| `docs/code-refactor/code-cleanup-report.json` | code-cleanup-refactor |
+| `App_Code/Exceptions/AppExceptions.vb` | global-exception-handling |
+| `docs/code-refactor/exception-handling-report.json` | global-exception-handling |
+| `App_Code/Logging/TelemetryHelper.vb` | appinsights-logging |
+| `ApplicationInsights.config` | appinsights-logging |
+| `docs/code-refactor/logging-enhancement-report.json` | appinsights-logging |
+| `docs/code-refactor/build-output.log` | build-validation |
+| `docs/code-refactor/conversion-report-<YYYY-MM-DD>.html` | html-report-generator |
+ 
+## Safety Guardrails
+ 
+- **Never** change business logic or authorization outcomes.
+- **Never** modify auto-generated files (`*.designer.vb`, `*.g.vb`, `AssemblyInfo.vb`).
+- **Never** write secret values to any file — use `__PLACEHOLDER__` tokens.
+- **Never** expose stack traces or raw SQL error messages in user-facing HTTP responses.
+- **Never** suppress auth-pipeline exceptions (OWIN, SAML, Windows Auth middleware).
+ 
