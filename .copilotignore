@@ -1,0 +1,48 @@
+# Defra AI Toolkit — Keeping data safe
+# https://digital.defra.gov.uk/ai-toolkit/guidance/keeping-data-safe
+# https://digital.defra.gov.uk/ai-toolkit/guidance/security
+#
+# Exclude files that may contain real credentials, secrets, or classified content
+# from Copilot's context window.
+#
+# IMPORTANT: Base project files (packages.config, *.csproj, web.config,
+# appsettings.json) are intentionally NOT excluded — the pdf-discovery agent
+# reads these to fingerprint the PDF library and locate licence key references.
+
+# Environment variable files
+.env
+.env.*
+*.env
+
+# Environment-specific appsettings (may contain real connection strings)
+appsettings.Production.json
+appsettings.Production.*.json
+appsettings.Staging.json
+appsettings.Staging.*.json
+appsettings.Live.json
+appsettings.UAT.json
+
+# Config transforms (may contain production connection strings or SMTP credentials)
+Web.Release.config
+Web.Staging.config
+Web.Live.config
+Web.UAT.config
+
+# Private keys and certificates
+*.pfx
+*.p12
+*.key
+*.pem
+
+# Test data that may contain real personal data
+**/TestData/real-*
+**/testdata/real-*
+**/fixtures/real-*
+
+# CI/CD pipeline secrets
+.github/secrets/
+**/pipeline-secrets*
+
+# OFFICIAL-SENSITIVE documents
+**/*OFFICIAL-SENSITIVE*
+**/*official-sensitive*
