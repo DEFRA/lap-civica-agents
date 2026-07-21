@@ -1,6 +1,6 @@
 ---
 name: appinsights-logging
-description: Inject Application Insights telemetry for observability which includes log context not personal information
+description: Inject Application Insights telemetry for observability which includes log context not personal information .
 ---
  
 # Skill: appinsights-logging
@@ -9,85 +9,89 @@ description: Inject Application Insights telemetry for observability which inclu
 Replace all legacy and inconsistent logging mechanisms in VB.NET / ASP.NET WebForms code with Application Insights structured telemetry. Installs the required NuGet packages, wires the `TelemetryClient` through a shared helper, and applies consistent log levels, contextual properties, and operation tracking across the entire codebase.
  
 ## Trigger Conditions
-- Called after `global-exception-handling` has wired `Application_Error` and domain exceptions are in place.
+- Called after `global-exception-handling` has wired the `UseExceptionHandler` middleware and domain exceptions are in place.
 - The exception types introduced by `global-exception-handling` are referenced in `TrackException` calls placed by this skill.
  
 ---
  
 ## Step 1 — Install NuGet Packages
  
-Add the following packages to every web project's `packages.config`:
- 
+Add the following packages to every web project's SDK-style `.vbproj` as `<PackageReference>` items:
+
 ```xml
-<package id="Microsoft.ApplicationInsights" version="2.22.0" targetFramework="net48" />
-<package id="Microsoft.ApplicationInsights.Web" version="2.22.0" targetFramework="net48" />
-<package id="Microsoft.ApplicationInsights.WindowsServer" version="2.22.0" targetFramework="net48" />
-<package id="Microsoft.ApplicationInsights.WindowsServer.TelemetryChannel" version="2.22.0" targetFramework="net48" />
+<ItemGroup>
+  <PackageReference Include="Microsoft.ApplicationInsights" Version="2.22.0" />
+  <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
+</ItemGroup>
 ```
+
+> `Microsoft.ApplicationInsights.Web` and `Microsoft.ApplicationInsights.WindowsServer` are classic `System.Web`-based packages and are **not compatible with .NET 10**. Use `Microsoft.ApplicationInsights.AspNetCore` instead.
+
+Run `dotnet restore` after adding the package references.
  
-Run `nuget restore` after editing `packages.config` (see `nuget-package-upgrade` skill for restore command).
- 
----
- 
-## Step 2 — Configure ApplicationInsights.config
- 
-Create or update `ApplicationInsights.config` at the project root:
- 
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<ApplicationInsights xmlns="http://schemas.microsoft.com/ApplicationInsights/2013/Settings">
-  <InstrumentationKey>__APP_INSIGHTS_INSTRUMENTATION_KEY__</InstrumentationKey>
-  <TelemetryInitializers>
-    <Add Type="Microsoft.ApplicationInsights.Web.AzureAppServiceRoleNameFromHostNameHeaderInitializer, Microsoft.AI.Web" />
-    <Add Type="Microsoft.ApplicationInsights.Web.OperationNameTelemetryInitializer, Microsoft.AI.Web" />
-    <Add Type="Microsoft.ApplicationInsights.Web.SyntheticUserAgentTelemetryInitializer, Microsoft.AI.Web" />
-    <Add Type="Microsoft.ApplicationInsights.Web.ClientIpHeaderTelemetryInitializer, Microsoft.AI.Web" />
-    <Add Type="Microsoft.ApplicationInsights.Web.OperationCorrelationTelemetryInitializer, Microsoft.AI.Web" />
-    <Add Type="Microsoft.ApplicationInsights.Web.UserTelemetryInitializer, Microsoft.AI.Web" />
-    <Add Type="Microsoft.ApplicationInsights.Web.AuthenticatedUserIdTelemetryInitializer, Microsoft.AI.Web" />
-    <Add Type="Microsoft.ApplicationInsights.Web.AccountIdTelemetryInitializer, Microsoft.AI.Web" />
-    <Add Type="Microsoft.ApplicationInsights.Web.SessionTelemetryInitializer, Microsoft.AI.Web" />
-  </TelemetryInitializers>
-  <TelemetryModules>
-    <Add Type="Microsoft.ApplicationInsights.Web.RequestTrackingTelemetryModule, Microsoft.AI.Web" />
-    <Add Type="Microsoft.ApplicationInsights.Web.ExceptionTrackingTelemetryModule, Microsoft.AI.Web" />
-  </TelemetryModules>
-</ApplicationInsights>
+## Step 2 — Configure Application Insights in appsettings.json and Program.cs
+
+`ApplicationInsights.config` is a classic SDK pattern and is **not used in .NET 5+**. Configuration is done via `appsettings.json` and service registration in `Program.cs`.
+
+**appsettings.json** — add the Application Insights connection string placeholder (value supplied via Key Vault at deploy time):
+
+```json
+{
+  "ApplicationInsights": {
+    "ConnectionString": "__APP_INSIGHTS_CONNECTION_STRING__"
+  }
+}
 ```
- 
-> Replace `__APP_INSIGHTS_INSTRUMENTATION_KEY__` with a Key Vault reference at deploy time — never hardcode the key.
+
+**Program.cs** — register Application Insights telemetry and the `TelemetryHelper` in the DI container:
+
+```csharp
+// Program.cs
+builder.Services.AddApplicationInsightsTelemetry();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<TelemetryHelper>();
+```
+
+> Never hardcode the connection string — use a Key Vault reference via Azure App Service application settings (`APPLICATIONINSIGHTS_CONNECTION_STRING`). Do not use the legacy `InstrumentationKey` — it is deprecated; use `ConnectionString` only.
  
 ---
  
 ## Step 3 — Create Shared TelemetryHelper
- 
-Create `App_Code\Logging\TelemetryHelper.vb`:
- 
+
+Create `BSESystem\Logging\TelemetryHelper.vb`. The helper is DI-registered (scoped) — it receives `TelemetryClient` and `IHttpContextAccessor` via constructor injection. Never create `TelemetryClient` instances directly in application code.
+
 ```vb
 Imports Microsoft.ApplicationInsights
 Imports Microsoft.ApplicationInsights.DataContracts
+Imports Microsoft.AspNetCore.Http
 Imports System.Collections.Generic
- 
-Namespace WebApp.Logging
- 
+
+Namespace BSESystem.Logging
+
     ''' <summary>
-    ''' Application-wide telemetry wrapper. All logging in the application
-    ''' must go through this class rather than creating TelemetryClient instances directly.
+    ''' Application-wide telemetry wrapper. Registered as a scoped service in Program.cs.
+    ''' All logging in the application must go through this class.
     ''' </summary>
-    Public NotInheritable Class TelemetryHelper
- 
-        Private Shared ReadOnly _client As New TelemetryClient()
- 
-        Private Sub New()
+    Public Class TelemetryHelper
+
+        Private ReadOnly _client As TelemetryClient
+        Private ReadOnly _httpContextAccessor As IHttpContextAccessor
+
+        Public Sub New(client As TelemetryClient, httpContextAccessor As IHttpContextAccessor)
+            _client = client
+            _httpContextAccessor = httpContextAccessor
         End Sub
- 
+
         ''' <summary>Log an exception with structured context properties.</summary>
-        Public Shared Sub TrackException(ex As Exception,
-                                         operation As String,
-                                         Optional additionalProperties As Dictionary(Of String, String) = Nothing)
+        Public Sub TrackException(ex As Exception,
+                                  operation As String,
+                                  Optional additionalProperties As Dictionary(Of String, String) = Nothing)
             Dim props As New Dictionary(Of String, String) From {
                 {"operation", operation},
-                {"appVersion", GetType(TelemetryHelper).Assembly.GetName().Version.ToString()}
+                {"appVersion", GetType(TelemetryHelper).Assembly.GetName().Version.ToString()},
+                {"userId", _httpContextAccessor.HttpContext?.User?.Identity?.Name},
+                {"sessionId", _httpContextAccessor.HttpContext?.Session?.Id},
+                {"pageUrl", _httpContextAccessor.HttpContext?.Request?.Path.Value}
             }
             If additionalProperties IsNot Nothing Then
                 For Each kvp In additionalProperties
@@ -96,24 +100,24 @@ Namespace WebApp.Logging
             End If
             _client.TrackException(ex, props)
         End Sub
- 
+
         ''' <summary>Log a diagnostic trace message.</summary>
-        Public Shared Sub TrackTrace(message As String,
-                                      level As SeverityLevel,
-                                      Optional operation As String = Nothing)
+        Public Sub TrackTrace(message As String,
+                               level As SeverityLevel,
+                               Optional operation As String = Nothing)
             Dim props As New Dictionary(Of String, String)
             If operation IsNot Nothing Then props("operation") = operation
             _client.TrackTrace(message, level, props)
         End Sub
- 
+
         ''' <summary>Log a named business event.</summary>
-        Public Shared Sub TrackEvent(eventName As String,
-                                      Optional properties As Dictionary(Of String, String) = Nothing)
+        Public Sub TrackEvent(eventName As String,
+                               Optional properties As Dictionary(Of String, String) = Nothing)
             _client.TrackEvent(eventName, properties)
         End Sub
- 
-        ''' <summary>Flush all pending telemetry. Call in Application_End.</summary>
-        Public Shared Sub Flush()
+
+        ''' <summary>Flush all pending telemetry.</summary>
+        Public Sub Flush()
             _client.Flush()
         End Sub
  
@@ -154,20 +158,27 @@ Every `TrackException` and significant `TrackTrace` call must include at minimum
 | Property | Source | Notes |
 |---|---|---|
 | `operation` | Enclosing method name | `NameOf(MethodName)` |
-| `userId` | `HttpContext.Current.User.Identity.Name` | Non-PII identifier; do not log full UPN |
-| `sessionId` | `HttpContext.Current.Session?.SessionID` | For session-correlated error diagnosis |
-| `pageUrl` | `HttpContext.Current.Request?.Url?.AbsolutePath` | Path only — no query string if it contains tokens |
+| `userId` | `_httpContextAccessor.HttpContext?.User?.Identity?.Name` | Non-PII identifier; do not log full UPN |
+| `sessionId` | `_httpContextAccessor.HttpContext?.Session?.Id` | For session-correlated error diagnosis |
+| `pageUrl` | `_httpContextAccessor.HttpContext?.Request?.Path.Value` | Path only — no query string if it contains tokens |
+
+> `HttpContext.Current` is not available in ASP.NET Core. Access `HttpContext` via the injected `IHttpContextAccessor` in `TelemetryHelper` — these properties are already captured automatically inside `TrackException` (see Step 3).
  
 ---
  
-## Step 6 — Wire Flush in Application_End
- 
-In `Global.asax.vb`, add:
- 
-```vb
-Sub Application_End(sender As Object, e As EventArgs)
-    TelemetryHelper.Flush()
-End Sub
+## Step 6 — Wire Flush on Application Shutdown
+
+`Global.asax.vb` `Application_End` is not processed in .NET 10. Wire the telemetry flush to `IHostApplicationLifetime.ApplicationStopped` in `Program.cs`:
+
+```csharp
+// Program.cs
+var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
+lifetime.ApplicationStopped.Register(() =>
+{
+    var telemetry = app.Services.GetRequiredService<TelemetryClient>();
+    telemetry.Flush();
+    Task.Delay(TimeSpan.FromSeconds(5)).Wait(); // Allow time for flush to complete
+});
 ```
  
 ---
@@ -179,12 +190,12 @@ Where `EventLog.WriteEntry` appears inside a `Catch` block, wrap it in a suppres
 ```vb
 ' Before
 Catch ex As Exception
-    EventLog.WriteEntry("MyApp", ex.Message, EventLogEntryType.Error)
+    EventLog.WriteEntry("BSE", ex.Message, EventLogEntryType.Error)
 End Try
  
 ' After
 Catch ex As Exception
-    TelemetryHelper.TrackException(ex, "ProcessRecord",
+    _telemetryHelper.TrackException(ex, "ProcessRecord",
         New Dictionary(Of String, String) From {{"recordId", recordId.ToString()}})
 End Try
 ```
@@ -197,10 +208,10 @@ End Try
  
 | Output | Description |
 |---|---|
-| `App_Code\Logging\TelemetryHelper.vb` | Shared telemetry wrapper class |
-| `ApplicationInsights.config` | Application Insights configuration file |
+| `BSESystem\Logging\TelemetryHelper.vb` | Shared telemetry wrapper class (DI-registered scoped service) |
+| `appsettings.json` | Updated with `ApplicationInsights.ConnectionString` placeholder |
 | `docs\code-refactor\logging-enhancement-report.json` | Structured log: legacy calls replaced, NuGet packages added, files modified |
-| All modified `.vb` files | Updated in place with `TelemetryHelper` calls |
+| All modified `.vb` files | Updated in place with `_telemetryHelper` instance calls |
  
 ---
  
@@ -210,7 +221,7 @@ End Try
 - **Never log** authentication tokens, session cookies, full UPN, or any PII in telemetry properties.
 - **Never** create a `new TelemetryClient()` directly in application code — always use `TelemetryHelper`.
 - **Never** use `TrackException` for expected business exceptions (e.g., `ValidationException` raised by user input) — use `TrackEvent` or `TrackTrace(Warning)` for expected paths.
-- Do **not** add `#Disable Warning` pragmas to suppress compiler warnings about replaced `EventLog` calls — fix them.
+- Do **not** add `#Disable Warning` or `#pragma warning disable` directives to suppress compiler warnings about replaced `EventLog` calls — fix them.
 - Do **not** use `Response.Write` for any diagnostic output — ever.
  
  --

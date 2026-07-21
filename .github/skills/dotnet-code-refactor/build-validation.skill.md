@@ -4,97 +4,91 @@
 > MSBuild classic and dotnet CLI modern build modes) lives at
 > `.github/skills/dotnet-framework-upgrade/build-validation.md`.
 > This copy is the **application-specific override** for the `dotnet-code-refactor` agent.
-> It applies **Mode A (MSBuild classic)** only — Windows runner, `nuget.exe`, MSBuild.
+> This copy applies **Mode B (dotnet CLI modern)** for Classic→Modern upgrade paths.
  
 ---
  
 ## Purpose
-Validate that the VB.NET / ASP.NET WebForms solution compiles cleanly in Release configuration after all refactoring, framework upgrade, and NuGet package upgrade changes have been applied. Capture all errors and warnings, categorise them, and drive iterative fixes until the build produces zero errors and acceptable warning counts.
+Validate that the solution compiles cleanly in Release configuration after all refactoring, framework upgrade, and NuGet package upgrade changes have been applied. Capture all errors and warnings, categorise them, and drive iterative fixes until the build produces zero errors and acceptable warning counts.
  
 ## Trigger Conditions
-- Always runs **after** `framework-upgrade` and `nuget-package-upgrade` have completed.
+- Always runs **after** `framework-upgrade` Mode B and `nuget-package-upgrade` Mode B have completed.
 - Re-runs after every batch of refactoring changes from `code-cleanup-refactor`, `global-exception-handling`, and `appinsights-logging` skills.
  
 ---
  
-## Step 1 — Restore NuGet Packages
+## Step 1 — Restore Packages. For BSE Project example
  
 ```powershell
-nuget restore <solution-file>.sln
+dotnet restore BSESystem.sln
 ```
- 
-> **Must use `nuget.exe`** — not `dotnet restore`. The `dotnet restore` command does not support `packages.config` style solutions.
  
 Confirm exit code is `0`. If restore fails, report each failed package as a **P0 blocking issue** and halt.
  
 ---
  
-## Step 2 — Run MSBuild in Release Configuration
+## Step 2 — Run Build in Release Configuration
  
 ```powershell
-msbuild "<solution-file>.sln" `
-  /p:Configuration=Release `
-  /p:Platform="Any CPU" `
-  /p:DeployOnBuild=false `
-  /t:Build `
-  /nologo `
-  /v:minimal `
-  2>&1 | Tee-Object -FilePath build-output.log
+dotnet build "BSESystem.sln" \
+  --configuration Release \
+  --no-restore \
+  2>&1 | tee build-output.log
 ```
- 
-> **Must use MSBuild** — not `dotnet build`. The `dotnet build` command does not support `System.Web`-based projects or `packages.config` NuGet restoration.
- 
+Can run on Windows or Linux. For CI/CD pipelines, `ubuntu-latest` runners are valid for .NET 5+ builds.
+
 ---
  
 ## Step 3 — Parse and Categorise Build Output
  
-Parse `build-output.log` for MSBuild diagnostic entries. Categorise each:
+Parse `build-output.log` for dotnet build diagnostic entries. Categorise each:
  
 | Category | Severity | Action |
 |---|---|---|
-| `error MSB*` | Build error — MSBuild infrastructure | Halt and fix project file issue |
-| `error BC*` | VB.NET compiler error | Fix code or reference issue |
-| `error CS*` | C# compiler error | Fix code or reference issue |
-| `warning BC40*` | VB.NET obsolescence warning | Log; fix if in touched files |
-| `warning BC42*` | VB.NET unused variable / import | Fix — these are dead code indicators |
-| `warning MSB3277` | Assembly reference conflict | Fix binding redirect in `web.config` |
-| `warning MSB3245` | Assembly not resolved | Fix `<HintPath>` or NuGet restore gap |
+| `CS*` | C# compiler error | Fix code |
+| `NETSDK*` | .NET SDK tooling error | Fix SDK version, `global.json`, or project file |
+| `NU*` | NuGet resolution error | Fix `PackageReference` version or source |
+| `warning CS8600–CS8670` | Nullable reference warning | Address in touched files; do not suppress |
+| `warning SYSLIB*` | Obsolete API warning | Plan replacement; document in upgrade report |
  
 ---
  
 ## Step 4 — Fix Errors Iteratively
  
-For each **compiler error** (`BC*` / `CS*`):
+For each remaining compiler error after initial build:
  
-1. Identify the file and line number.
+1. Identify file, line, and error code.
 2. Determine root cause:
-   - **Missing `Imports` / `using`** after NuGet package upgrade changed namespace.
-   - **Changed constructor signature** in an upgraded package.
-   - **Renamed type or member** in an upgraded package.
-   - **Ambiguous reference** after adding Application Insights namespaces.
-3. Apply the minimal fix that resolves the error without changing application behaviour.
-4. Re-run MSBuild after each batch of fixes.
+   - **Missing `Imports` / `using`** — namespace moved in upgraded package.
+   - **Changed constructor or method signature** — API change in upgraded package.
+   - **Renamed type** — check package release notes for the version delta.
+   - **Ambiguous reference** — two packages now expose the same type.
+   - **Obsolete API removed** — use the recommended modern API.
+3. Apply the minimal fix.
+4. Re-run build.
+5. Repeat until zero errors.
+ 
+**Cap**: If errors do not reach zero after 5 iterations, surface all remaining errors as **blocking issues** in the upgrade report and halt. Do not apply speculative fixes beyond this point.
  
 ---
  
-## Step 5 — Fix Assembly Reference Conflicts (MSB3277)
- 
-For every `MSB3277` warning (multiple versions of the same assembly):
- 
-1. Identify the conflicting assembly name and the two versions in conflict.
-2. Add or update a `<bindingRedirect>` in `web.config` to redirect the lower version to the higher version.
-3. Confirm the output assembly will use the correct version at runtime.
+## Step 5 — Fix NuGet Package Version Conflicts (NU1605)
+
+For every `NU1605` warning (package downgrade detected):
+1. Identify the conflicting package and versions.
+2. Update `<PackageReference>` version to the highest required version.
+3. Run `dotnet restore` again to confirm resolution.
  
 ---
  
 ## Step 6 — Validate Zero Errors
  
 Confirm:
-- `msbuild` exits with code `0`.
-- The output log contains `0 Error(s)`.
-- All critical `MSB3245` (unresolved assembly) warnings are eliminated.
+- Build tool exits with code `0`.
+- Output contains `0 Error(s)` (MSBuild) or `Build succeeded` (dotnet CLI).
+- All `MSB3245` (unresolved assembly) warnings are eliminated.
  
-If zero-error state cannot be achieved, report all remaining errors with their file, line, error code, and the attempted fix. Do not proceed to deployment packaging.
+If zero-error state cannot be achieved, log all unresolved errors in `build-validation-report.json` and set `buildStatus: "blocked"`.
  
 ---
  
@@ -109,14 +103,10 @@ Record the count and category of remaining warnings after the zero-error build. 
 If deployment packaging is requested:
  
 ```powershell
-msbuild "<WebProject>.vbproj" `
-  /p:Configuration=Release `
-  /p:DeployOnBuild=true `
-  /p:WebPublishMethod=Package `
-  /p:PackageAsSingleFile=true `
-  /p:SkipInvalidConfigurations=true `
-  /p:PackageLocation=".\artifacts" `
-  /nologo
+dotnet publish "BSESystem.csproj" `
+  --configuration Release `
+  --output ".\artifacts" `
+  --no-build
 ```
  
 ---
@@ -133,7 +123,7 @@ msbuild "<WebProject>.vbproj" `
  
 ## Constraints
  
-- **Never** use `dotnet build` or `dotnet restore`.
-- **Never** run build on a Linux runner — the .NET Framework build toolchain is Windows-only.
-- **Never** suppress warnings by adding `#Disable Warning` pragmas without documenting the specific reason.
-- **Never** mark the build as passing if `Error(s)` count is greater than zero.
+- **Always** use `dotnet build` and `dotnet restore` — never use `msbuild` or `nuget.exe restore` for SDK-style projects.
+- **Can run on Linux or Windows** — .NET 10 SDK is cross-platform.
+- Never suppress compiler warnings by adding `#Disable Warning` pragmas without documenting the reason in the upgrade report.
+- Never mark the build as passing (`buildStatus: "success"`) when error count is greater than zero.

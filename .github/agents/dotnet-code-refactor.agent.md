@@ -1,7 +1,6 @@
 ---
 name: dotnet-code-refactor-agent
-description: Cleans and improves legacy code, with strong focus on maintainability, error handling, and logging, without changing business logic.
-model: Claude Sonnet 4.6 (copilot) # specify the model to use for this agent. If not set, the default model will be used.
+description: This agent is specific to 4 civica applications (BSE, Histo, D2R2 and PTLIMS) . Cleans and improves VB.NET / ASP.NET WebForms (post dotnet-framework-upgrade), with strong focus on maintainability, error handling, and logging, without changing business logic.
  
 tools: ['search/codebase', 'read/problems', 'edit' ] # specify the tools this agent can use. If not set, all enabled tools are allowed.
 ---
@@ -13,7 +12,7 @@ tools: ['search/codebase', 'read/problems', 'edit' ] # specify the tools this ag
 | Order | Skill | Purpose |
 |---|---|---|
 | 1 | `code-cleanup-refactor` | Remove dead code, fix naming, split large methods, catalogue TODOs, remove `On Error Resume Next` |
-| 2 | `global-exception-handling` | Replace generic exceptions with domain types, fix empty catch blocks, wire `Global.asax` handler |
+| 2 | `global-exception-handling` | Replace generic exceptions with domain types, fix empty catch blocks, wire `UseExceptionHandler` in `Program.cs` |
 | 3 | `appinsights-logging` | Replace legacy logging with Application Insights structured telemetry |
 | 4 | `build-validation` | Restore packages and run MSBuild; iterate until zero errors |
 | 5 | `html-report-generator` | Produce the styled HTML conversion report from all skill outputs |
@@ -30,8 +29,8 @@ tools: ['search/codebase', 'read/problems', 'edit' ] # specify the tools this ag
  
 | Parameter | Required | Description | Example |
 |---|---|---|---|
-| `solutionFolder` | ✅ Yes | Absolute or relative path to the repository root containing the `.sln` file | `C:\Projects\ApplicationSystem` |
-| `reportOutputFolder` | No | Folder where the HTML report is written (default: `<solutionFolder>\docs\code-refactor`) | `C:\Projects\ApplicationSystem\docs\code-refactor` |
+| `solutionFolder` | ✅ Yes | Absolute or relative path to the repository root containing the `.sln` file | `C:\Projects\BSE` |
+| `reportOutputFolder` | No | Folder where the HTML report is written (default: `<solutionFolder>\docs\code-refactor`) | `C:\Projects\BSE\docs\code-refactor` |
  
 ## Output Contract
  
@@ -44,7 +43,7 @@ tools: ['search/codebase', 'read/problems', 'edit' ] # specify the tools this ag
 ## Prerequisite
  
 > **Run the `dotnet-framework-upgrade` agent first** before invoking this agent.
-> This agent assumes the solution already targets  or  and all NuGet packages
+> This agent assumes the solution already targets `net10.0` and all NuGet packages
 > have been upgraded to compatible versions. Framework and NuGet upgrade responsibilities
 > are owned exclusively by the `dotnet-framework-upgrade` agent.
  
@@ -62,24 +61,26 @@ tools: ['search/codebase', 'read/problems', 'edit' ] # specify the tools this ag
 ### 1.2 Error Handling Improvement
 - Replace all empty `Catch` blocks with structured handling: log the exception via Application Insights then re-throw or return a typed error result
 - Replace `Catch ex As Exception` with domain-specific exception types from the application exception hierarchy
-- Domain exception hierarchy base: `AppException` → `DataAccessException`, `ValidationException`, `IntegrationException`
-- Maintain the global exception handling in `Global.asax` `Application_Error` — route all unhandled exceptions through a centralised `IHttpModule` handler
-- Ensure all `Catch` blocks that suppress exceptions contain at minimum an Application Insights `TrackException` call
+- Domain exception hierarchy base. For example, for a BSE Application: `BSEException` → `DataAccessException`, `ValidationException`, `IntegrationException`
+- Wire the global exception handler as `UseExceptionHandler` middleware in `Program.cs` — route all unhandled exceptions through it; `Global.asax` `Application_Error` is dead code in .NET 10 and must not be used
+- Ensure all `Catch` blocks that suppress exceptions contain at minimum an Application Insights `_telemetryHelper.TrackException` call
  
 ### 1.3 Logging Enhancement
 - Replace `EventLog.WriteEntry`, `Debug.Print`, and `Response.Write` debug output with Application Insights structured telemetry
 - Use the correct severity: `TrackException` for errors and exceptions, `TrackEvent` for business events, `TrackTrace` for diagnostic messages
 - Apply log-level discipline: Verbose → Information → Warning → Error → Critical — never use Error level for expected business exceptions
 - Add contextual properties to every telemetry call: operation name, user identifier (non-PII), and module/class name
-- Wrap `EventLog.WriteEntry` calls in a suppressing try/catch where the underlying EventLog service is unavailable on App Service (see `azure-infra.instructions.md`)
+- `EventLog.WriteEntry` is not available on Azure App Service — replace all occurrences with `_telemetryHelper.TrackException` or `_telemetryHelper.TrackTrace`; do not wrap in suppressing try/catch
  
 ### 1.4 Quality & Safety Checks
-- Compile/build validation using MSBuild in Release configuration — zero errors must be achieved before completion
-- NuGet restore must use `nuget.exe`, not `dotnet restore`
-- Build must run on Windows only — the .NET Framework toolchain is not available on Linux runners
+- Compile/build validation in Release configuration — zero errors must be achieved before completion
+- **Modern (`net10.0`)**: use `dotnet restore` then `dotnet build --configuration Release`
+- `dotnet build` runs cross-platform (Windows, Linux, macOS) — no OS restriction applies for SDK-style `.NET 10` projects
  
 
 ## 2. Success Criteria
 - Zero `On Error Resume Next` statements remain in any `.vb` file
 - Zero empty `Catch` blocks remain
-- Zero `EventLog.WriteEntry` calls remain outside suppressing wrappers 
+- Zero `EventLog.WriteEntry` calls remain in any `.vb` file
+- `UseExceptionHandler` middleware is wired in `Program.cs` and redirects to safe Razor Page error routes
+- `TelemetryHelper` is the sole logging entry point across the codebase

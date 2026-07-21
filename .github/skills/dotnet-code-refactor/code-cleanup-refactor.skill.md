@@ -1,16 +1,19 @@
 ---
 name: code-cleanup-refactor
-description: Clean code and remove duplication using best-practice refactoring.
+description: This skill is used by dotnet-code-refactor agent specifically for migrated Civica applications (BSE, Histo, D2R2 and PTLIMS) . Cleans code and remove duplication using best-practice refactoring.
 ---
  
 # Skill: code-cleanup-refactor
  
 ## Purpose
-Scan all VB.NET source files in the solution, remove dead and unreachable code, enforce naming conventions, split oversized methods and classes, catalogue TODO/FIXME/HACK comments, and remove `On Error Resume Next` patterns — replacing them with structured `Try`/`Catch` blocks.
+Scan all source files in the solution, remove dead and unreachable code, enforce naming conventions, split oversized methods and classes, catalogue TODO/FIXME/HACK comments, and remove `On Error Resume Next` patterns — replacing them with structured `Try`/`Catch` blocks.
  
 ## Trigger Conditions
-- Called after `framework-upgrade` and `nuget-package-upgrade` have completed.
-- Runs before `global-exception-handling` so that `On Error Resume Next` patterns are resolved into `Try`/`Catch` blocks first.
+- Called after `framework-upgrade` Mode B and `nuget-package-upgrade` Mode B have completed.
+- At this point the solution targets `.NET 10` with an SDK-style `.vbproj`. All existing application source files are still VB.NET (`.vb`). New C# scaffold files (`Program.cs`, `.cshtml` + `.cshtml.cs` stubs) have been created by the framework upgrade but must not be modified by this skill.
+- Remove legacy VB.NET exception suppression patterns:
+  - Remove `On Error Resume Next` / `On Error GoTo 0` pairs — replace with structured `Try`/`Catch` blocks.
+  - Remove empty `Catch` blocks swallowing exceptions with no logging.
  
 ---
  
@@ -31,16 +34,8 @@ Identify and remove:
 | Unused `Imports` statements | Remove the `Imports` line |
 | Unreferenced `Public`/`Private` `Sub` or `Function` within `Module`/`Class` | Remove after confirming no dynamic/reflection binding |
 | Code after `Return` or `Exit Sub` within the same block | Remove unreachable lines |
-| Orphaned event handlers (`Handles` clause referencing a control that no longer exists in `.aspx`) | Remove the handler sub |
-| Commented-out code blocks (3+ consecutive commented lines) | Log as candidate for removal; do not remove without marking in TODO catalogue |
-| Empty `If` blocks with no body | Remove the `If`/`End If` structure |
- 
-> **Do not remove** code that is invoked via reflection, late binding (`CallByName`), or dynamic event subscription (`AddHandler`).
- 
-Log each removal in `docs/code-refactor/code-cleanup-report.json` with: file path, line range, pattern type, action taken.
- 
----
- 
+| Orphaned event handlers (`Handles` clause referencing a control that no longer exists) | Remove the handler sub — after Classic→Modern all WebForms controls are gone from the runtime; every `Handles` clause in `.aspx.vb` code-behind is dead code |
+| `.aspx.vb` code-behind methods that only perform WebForms UI binding (`Page_Load`, `Button_Click`, etc.) | Log as dead code candidates; do not remove — flag for manual migration to Razor Page `OnGet`/`OnPost` handlers |
 ## Step 3 — Enforce Naming Conventions
  
 | Element | Convention | Example |
@@ -105,10 +100,11 @@ End Sub
  
 Search all files for comments containing: `TODO`, `FIXME`, `HACK`, `TEMP`, `WORKAROUND` (case-insensitive).
  
-For each match, record:
- 
-```json
-{
+Scan both VB.NET source files and the stub Razor Pages created by the framework upgrade:
+- `*.vb` — application source
+- `*.cshtml.cs` — Razor Page stubs (contain `// TODO: Migrate from WebForms` markers)
+- `*.cshtml` — Razor Page view stubs
+
   "file": "relative/path/to/file.vb",
   "line": 142,
   "comment": "' TODO: Replace with stored procedure call",
@@ -147,7 +143,7 @@ Try
     result = repository.GetRecord(recordId)
 Catch ex As DataAccessException
     lblError.Text = "Unable to retrieve data. Please try again."
-    telemetry.TrackException(ex, New Dictionary(Of String, String) From {
+    _telemetryHelper.TrackException(ex, New Dictionary(Of String, String) From {
         {"recordId", recordId.ToString()},
         {"operation", "GetRecord"}
     })
@@ -173,9 +169,10 @@ End Try
 ---
  
 ## Constraints
- 
+
 - Do **not** remove code that is invoked via `CallByName`, `AddHandler`, or reflection.
-- Do **not** rename Public members that are referenced from `.aspx` markup `<%# %>` data-binding expressions without also updating the markup.
+- Do **not** rename Public members that are referenced from `.aspx` markup `<%# %>` data-binding expressions — these files still exist on disk even though they are not processed by the .NET 10 runtime. Renaming without updating the markup will cause build errors if the `.aspx` files are ever compiled.
 - Do **not** remove `TODO` comments from source — catalogue only.
 - Do **not** split auto-generated designer files (`*.designer.vb`).
 - Do **not** enforce naming conventions on auto-generated code.
+- Do **not** modify `.cshtml` or `.cshtml.cs` stub files generated by `framework-upgrade` — those are flagged for manual migration and must not be altered by this skill.

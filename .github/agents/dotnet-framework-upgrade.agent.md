@@ -1,11 +1,11 @@
 ---
 name: dotnet-framework-upgrade
 description: >
+  This agent is specific to 4 civica applications (BSE, Histo, D2R2 and PTLIMS).
   Upgrades a .NET solution from any source framework version to a specified target version.
   Supports Classic-to-Classic paths (e.g. .NET Framework 4.0 → 4.8) and Classic-to-Modern paths
   (e.g. .NET Framework 4.0 → .NET 10). Handles project file format conversion, NuGet package
-  resolution, build validation, and HTML report generation. Generic and reusable across any
-  .NET application — not tied to any specific application name or technology stack.
+  resolution, build validation, and HTML report generation. Cannot be reusable across any other .NET application other than the 4 civica applications mentioned above.
 ---
  
 ## Skills Used
@@ -34,10 +34,10 @@ description: >
  
 | Parameter | Required | Description | Example Values |
 |---|---|---|---|
-| `solutionFolder` | ✅ Yes | Absolute path to the repository root containing the `.sln` file | `C:\Projects\MyApplication` |
+| `solutionFolder` | ✅ Yes | Absolute path to the repository root containing the `.sln` file | `C:\Projects\bse` |
 | `sourceFramework` | ✅ Yes | Current framework moniker of the solution | `net40`, `net462`, `net472`, `net48`, `net8.0` |
 | `targetFramework` | ✅ Yes | Desired target framework moniker after upgrade | `net48`, `net8.0`, `net10.0` |
-| `reportOutputFolder` | No | Folder where the HTML report is written (default: `<solutionFolder>\upgrade-reports`) | `C:\Reports\MyApp` |
+| `reportOutputFolder` | No | Folder where the HTML report is written (default: `<solutionFolder>\upgrade-reports`) | `C:\Projects\bse\upgrade-reports` |
  
 ### Upgrade Path Examples
  
@@ -127,6 +127,4 @@ Use this agent when:
  
 ## 3. Generic Usage
  
-This agent does not reference any specific application name. All examples in skill files use placeholder names (`MyApplication`, `SampleService`, `SamplePage`) that must be substituted with the real application artefacts found in `solutionFolder`.
- 
-The agent is designed to be invoked repeatedly across multiple solutions. Each invocation is independent — output reports are date-stamped and placed in the `reportOutputFolder` to avoid overwriting previous runs.
+The agent is designed to be invoked repeatedly across multiple solutions of 4 civica applications. Each invocation is independent — output reports are date-stamped and placed in the `reportOutputFolder` to avoid overwriting previous runs.

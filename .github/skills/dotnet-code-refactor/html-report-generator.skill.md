@@ -42,7 +42,13 @@ Produce a single, self-contained `.html` file with embedded CSS. Do not referenc
  
 #### 2. Framework Upgrade
 - Table: File | Old Version | New Version | Status
-- `web.config` changes: `httpRuntime targetFramework` and `requestValidationMode` diffs
+- **Classic→Classic** changes: `web.config` diffs — `httpRuntime targetFramework` and `requestValidationMode` before/after
+- **Classic→Modern** changes (when `pathType` = Classic→Modern):
+  - Project file conversion: `.vbproj` classic format → SDK-style with `<TargetFramework>net10.0</TargetFramework>`
+  - `web.config` `<appSettings>` keys migrated to `appsettings.json` — list of keys moved (values masked if sensitive)
+  - `Program.cs` skeleton created — list of `TODO` placeholders for manual wiring
+  - `Global.asax` flagged as dead code — lifecycle methods mapped to their ASP.NET Core equivalents
+  - Stub Razor Pages created: table of `.aspx` source → `.cshtml`/`.cshtml.cs` stub target
  
 #### 3. NuGet Package Upgrades
 - Table: Package | Old Version | New Version | CVE Flag | Status
@@ -59,20 +65,20 @@ Produce a single, self-contained `.html` file with embedded CSS. Do not referenc
 - **Domain Exception Hierarchy** diagram (ASCII or structured list)
 - Table: File | Old Pattern | New Pattern | Error Type
 - Empty catch blocks removed: File | Line | Added Logging Statement
+- Global exception handler: `UseExceptionHandler` middleware wired in `Program.cs` — confirm present or flag as missing
  
 #### 6. Logging Enhancement
-- NuGet packages added: `Microsoft.ApplicationInsights.Web` version
-- `TelemetryClient` wiring summary (where initialised)
+- NuGet packages added: `Microsoft.ApplicationInsights.AspNetCore` version
+- `TelemetryHelper` DI registration summary: registered as scoped service in `Program.cs`; `IHttpContextAccessor` injected for contextual properties
 - Table: File | Old Logging Method | New Logging Call | Log Level
 - Log level mapping applied:
- 
+
 | Legacy Pattern | New Application Insights Call | Level |
 |---|---|---|
-| `EventLog.WriteEntry(..., Error)` | `client.TrackException(ex)` | Error |
-| `Debug.Print` | `client.TrackTrace(..., SeverityLevel.Verbose)` | Verbose |
-| `Console.WriteLine` (info) | `client.TrackTrace(..., SeverityLevel.Information)` | Information |
-| `Response.Write` (debug) | `client.TrackTrace(..., SeverityLevel.Warning)` | Warning |
- 
+| `EventLog.WriteEntry(..., Error)` | `_telemetryHelper.TrackException(ex, ...)` | Error |
+| `Debug.Print` | `_telemetryHelper.TrackTrace(..., SeverityLevel.Verbose)` | Verbose |
+| `Console.WriteLine` (info) | `_telemetryHelper.TrackTrace(..., SeverityLevel.Information)` | Information |
+| `Response.Write` (debug) | `_telemetryHelper.TrackTrace(..., SeverityLevel.Warning)` | Warning |
 #### 7. Build Validation
 - Build exit code and status
 - Error count and warning count (before and after)
@@ -122,18 +128,15 @@ pre { padding: 12px; overflow-x: auto; }
 Write the generated HTML to:
  
 ```
-<repository-root>\refactor-reports\conversion-report-<YYYY-MM-DD>.html
+bse\docs\code-refactor\conversion-report-<YYYY-MM-DD>.html
 ```
- 
-If the `refactor-reports\` directory does not exist, create it.
- 
----
- 
+
+If the `docs\code-refactor\` directory does not exist, create it.
 ## Outputs
  
 | Output | Description |
 |---|---|
-| `refactor-reports/conversion-report-<date>.html` | Full styled HTML report |
+| `docs/code-refactor/conversion-report-<date>.html` | Full styled HTML report |
  
 ---
  
@@ -141,4 +144,4 @@ If the `refactor-reports\` directory does not exist, create it.
  
 - The HTML file must be **self-contained** — no `<link>` to external CSS, no `<script src="...">` to CDNs.
 - Do **not** include any secret values (connection strings, keys) in the report even if they appear in diff context.
-- The report file must **not** be committed to source control (add `refactor-reports/` to `.gitignore` if not already present).
+- The report file must **not** be committed to source control (add `docs/code-refactor/` to `.gitignore` if not already present).
