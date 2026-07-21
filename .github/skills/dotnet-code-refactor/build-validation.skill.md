@@ -9,11 +9,16 @@
 ---
  
 ## Purpose
-Validate that the solution compiles cleanly in Release configuration after all refactoring, framework upgrade, and NuGet package upgrade changes have been applied. Capture all errors and warnings, categorise them, and drive iterative fixes until the build produces zero errors and acceptable warning counts.
+Validate that the solution compiles cleanly in Release configuration after all refactoring changes have been applied to a `.NET 10` SDK-style project. Capture all errors and warnings, categorise them by language and error code, and drive iterative fixes until the build produces zero errors and acceptable warning counts.
+
+The `language` input determines which compiler error codes are expected:
+- **`language=vb`**: expect `BC*` (VB.NET compiler) errors in `.vb` files alongside `CS*` errors in `Program.cs` and `.cshtml.cs` scaffold files.
+- **`language=cs`**: expect only `CS*` errors across all `.cs` and `.cshtml.cs` files.
  
 ## Trigger Conditions
-- Always runs **after** `framework-upgrade` Mode B and `nuget-package-upgrade` Mode B have completed.
-- Re-runs after every batch of refactoring changes from `code-cleanup-refactor`, `global-exception-handling`, and `appinsights-logging` skills.
+- Runs within the `dotnet-code-refactor` agent after `code-cleanup-refactor`, `global-exception-handling`, and `appinsights-logging` skills have all completed.
+- Re-runs after every batch of fix iterations until zero errors are achieved or the 5-iteration cap is reached.
+- The solution must already target `.NET 10` with SDK-style project files — this skill does not perform any framework or NuGet upgrades.
  
 ---
  
@@ -46,9 +51,11 @@ Parse `build-output.log` for dotnet build diagnostic entries. Categorise each:
 | Category | Severity | Action |
 |---|---|---|
 | `CS*` | C# compiler error | Fix code |
+| `BC*` | VB.NET compiler error | Fix VB.NET source; applies when `language=vb` and `.vb` files remain in the solution |
 | `NETSDK*` | .NET SDK tooling error | Fix SDK version, `global.json`, or project file |
 | `NU*` | NuGet resolution error | Fix `PackageReference` version or source |
 | `warning CS8600–CS8670` | Nullable reference warning | Address in touched files; do not suppress |
+| `warning BC42*` | VB.NET obsolete/nullable warning | Address in touched `.vb` files; do not suppress |
 | `warning SYSLIB*` | Obsolete API warning | Plan replacement; document in upgrade report |
  
 ---
@@ -58,17 +65,20 @@ Parse `build-output.log` for dotnet build diagnostic entries. Categorise each:
 For each remaining compiler error after initial build:
  
 1. Identify file, line, and error code.
-2. Determine root cause:
-   - **Missing `Imports` / `using`** — namespace moved in upgraded package.
-   - **Changed constructor or method signature** — API change in upgraded package.
-   - **Renamed type** — check package release notes for the version delta.
-   - **Ambiguous reference** — two packages now expose the same type.
-   - **Obsolete API removed** — use the recommended modern API.
-3. Apply the minimal fix.
-4. Re-run build.
-5. Repeat until zero errors.
- 
-**Cap**: If errors do not reach zero after 5 iterations, surface all remaining errors as **blocking issues** in the upgrade report and halt. Do not apply speculative fixes beyond this point.
+2. Determine root cause based on error prefix:
+
+   **C# errors (`CS*`) — applies to both `language=vb` and `language=cs`:**
+   - `CS0246` / `CS0234` — missing `using` or type not found — namespace moved in upgraded package or `TelemetryHelper`/exception type not yet created.
+   - `CS1061` — method or property does not exist — API change in upgraded package; use the modern replacement.
+   - `CS8600`–`CS8670` — nullable reference — add null checks or null-forgiving operator only where the value is guaranteed non-null.
+   - `CS0103` — name does not exist in context — DI-injected service not registered in `Program.cs`; add the missing `builder.Services` call.
+
+   **VB.NET errors (`BC*`) — applies to `language=vb` only:**
+   - `BC30002` — type not defined — missing `Imports` statement or type not yet created by a preceding skill.
+   - `BC30456` — member not found — API change in upgraded package; check release notes for the version delta.
+   - `BC36610` — name not declared — renamed symbol from `code-cleanup-refactor`; verify all call sites were updated.
+   - `BC42016` — implicit conversion warning — add explicit cast; do not suppress.
+
  
 ---
  
@@ -85,11 +95,10 @@ For every `NU1605` warning (package downgrade detected):
  
 Confirm:
 - Build tool exits with code `0`.
-- Output contains `0 Error(s)` (MSBuild) or `Build succeeded` (dotnet CLI).
-- All `MSB3245` (unresolved assembly) warnings are eliminated.
- 
-If zero-error state cannot be achieved, log all unresolved errors in `build-validation-report.json` and set `buildStatus: "blocked"`.
- 
+- Output contains `Build succeeded` (dotnet CLI).
+- `0 Error(s)` in the summary line.
+- No `BC*` errors remain in `.vb` files (`language=vb`).
+- No `CS*` errors remain in `.cs` or `.cshtml.cs` files (both language values).
 ---
  
 ## Step 7 — Capture Warning Baseline
@@ -103,12 +112,14 @@ Record the count and category of remaining warnings after the zero-error build. 
 If deployment packaging is requested:
  
 ```powershell
+# language=cs — .csproj
 dotnet publish "BSESystem.csproj" `
   --configuration Release `
   --output ".\artifacts" `
   --no-build
-```
- 
+
+# language=vb — .vbproj
+dotnet publish "BSESystem.vbproj" `
 ---
  
 ## Outputs
@@ -122,8 +133,9 @@ dotnet publish "BSESystem.csproj" `
 ---
  
 ## Constraints
- 
-- **Always** use `dotnet build` and `dotnet restore` — never use `msbuild` or `nuget.exe restore` for SDK-style projects.
-- **Can run on Linux or Windows** — .NET 10 SDK is cross-platform.
-- Never suppress compiler warnings by adding `#Disable Warning` pragmas without documenting the reason in the upgrade report.
+
+- **Always** use `dotnet build` and `dotnet restore` — never use `msbuild` or `nuget.exe restore` for SDK-style `.NET 10` projects.
+- **Can run on Linux or Windows** — .NET 10 SDK is cross-platform; both VB.NET and C# SDK-style projects build correctly on either OS.
+- Never suppress compiler warnings by adding `#Disable Warning` (VB.NET) or `#pragma warning disable` (C#) without documenting the reason in the refactor report.
 - Never mark the build as passing (`buildStatus: "success"`) when error count is greater than zero.
+- Do **not** attempt to fix errors in `.designer.vb`, `*.g.cs`, or auto-generated files under `obj/` — regenerate those files instead.

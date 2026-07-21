@@ -16,90 +16,134 @@ Replace all generic, silent, and unstructured exception handling in C# / ASP.NET
  
 ## Step 1 — Define the Domain Exception Hierarchy. For Example , for BSE Application
  
-Create a new file `BSESystem\Exceptions\BSESystemExceptions.vb` (or the equivalent shared-code path for the project):
- 
+**Determine the output file based on the `language` input before creating the file.**
+
+### language=vb — Create `BSESystem\Exceptions\BSESystemExceptions.vb`
+
 ```vb
 Namespace BSESystem.Exceptions
- 
+
     ''' <summary>Base exception for all application-layer errors.</summary>
     Public Class BSEException
         Inherits Exception
- 
+
         Public Sub New(message As String)
             MyBase.New(message)
         End Sub
- 
+
         Public Sub New(message As String, innerException As Exception)
             MyBase.New(message, innerException)
         End Sub
     End Class
- 
+
     ''' <summary>Raised when a database or data-access operation fails.</summary>
     Public Class DataAccessException
-        Inherits BSESystemException
- 
+        Inherits BSEException
+
         Public Property Operation As String
- 
+
         Public Sub New(message As String, operation As String, innerException As Exception)
             MyBase.New(message, innerException)
             Me.Operation = operation
         End Sub
     End Class
- 
+
     ''' <summary>Raised when user-supplied input fails domain validation rules.</summary>
     Public Class ValidationException
-        Inherits BSESystemException
- 
+        Inherits BSEException
+
         Public Property FieldName As String
- 
+
         Public Sub New(message As String, fieldName As String)
             MyBase.New(message)
             Me.FieldName = fieldName
         End Sub
     End Class
- 
+
     ''' <summary>Raised when an external service or integration call fails.</summary>
     Public Class IntegrationException
-        Inherits BSESystemException
- 
+        Inherits BSEException
+
         Public Property ServiceName As String
- 
+
         Public Sub New(message As String, serviceName As String, innerException As Exception)
             MyBase.New(message, innerException)
             Me.ServiceName = serviceName
         End Sub
     End Class
- 
+
     ''' <summary>Raised when a requested resource does not exist.</summary>
     Public Class NotFoundException
-        Inherits BSESystemException
- 
+        Inherits BSEException
+
         Public Sub New(resourceType As String, resourceId As String)
             MyBase.New($"{resourceType} '{resourceId}' was not found.")
         End Sub
     End Class
- 
+
 End Namespace
 ```
- 
+
+### language=cs — Create `BSESystem\Exceptions\BSESystemExceptions.cs`
+
+```csharp
+namespace BSESystem.Exceptions;
+
+/// <summary>Base exception for all application-layer errors.</summary>
+public class BSEException : Exception
+{
+    public BSEException(string message) : base(message) { }
+    public BSEException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+/// <summary>Raised when a database or data-access operation fails.</summary>
+public class DataAccessException : BSEException
+{
+    public string Operation { get; }
+    public DataAccessException(string message, string operation, Exception innerException)
+        : base(message, innerException) => Operation = operation;
+}
+
+/// <summary>Raised when user-supplied input fails domain validation rules.</summary>
+public class ValidationException : BSEException
+{
+    public string FieldName { get; }
+    public ValidationException(string message, string fieldName)
+        : base(message) => FieldName = fieldName;
+}
+
+/// <summary>Raised when an external service or integration call fails.</summary>
+public class IntegrationException : BSEException
+{
+    public string ServiceName { get; }
+    public IntegrationException(string message, string serviceName, Exception innerException)
+        : base(message, innerException) => ServiceName = serviceName;
+}
+
+/// <summary>Raised when a requested resource does not exist.</summary>
+public class NotFoundException : BSEException
+{
+    public NotFoundException(string resourceType, string resourceId)
+        : base($"{resourceType} '{resourceId}' was not found.") { }
+}
 ---
  
 ## Step 2 — Replace Generic Catch Clauses
  
-Scan all `.vb` files for `Catch ex As Exception` blocks.
- 
+Scan all `.vb` files (language=vb) **or** all `.cs` and `.cshtml.cs` files (language=cs) for generic catch clauses.
+
 For each occurrence, determine which domain exception type is most appropriate based on the enclosing context:
- 
-| Context | Replace `Exception` With |
+
+| Context | Replace with |
 |---|---|
 | Data access method (SqlCommand, stored proc, DataAdapter) | `DataAccessException` |
 | Input processing, form validation | `ValidationException` |
 | External service call (HTTP, SMTP, file I/O) | `IntegrationException` |
 | Resource lookup (GetById, FindByName) that can return nothing | `NotFoundException` |
 | All others where no specific type can be determined | Keep `Exception` but add structured logging |
- 
-### Replacement Pattern
- 
+
+### VB.NET Replacement Pattern (language=vb)
+
 **Before:**
 ```vb
 Try
@@ -108,7 +152,7 @@ Catch ex As Exception
     lblError.Text = ex.Message
 End Try
 ```
- 
+
 **After:**
 ```vb
 Try
@@ -119,29 +163,69 @@ Catch ex As Exception
     Throw New BSEException("Unexpected error during save.", ex)
 End Try
 ```
- 
+
+### C# Replacement Pattern (language=cs)
+
+**Before:**
+```csharp
+try
+{
+    sqlCmd.ExecuteNonQuery();
+}
+catch (Exception ex)
+{
+    lblError.Text = ex.Message;
+}
+```
+
+**After:**
+```csharp
+try
+{
+    sqlCmd.ExecuteNonQuery();
+}
+catch (SqlException ex)
+{
+    throw new DataAccessException("Failed to save record.", "SaveRecord", ex);
+}
+catch (Exception ex)
+{
+    throw new BSEException("Unexpected error during save.", ex);
+}
 ---
  
 ## Step 3 — Fix Empty Catch Blocks
  
-An empty `Catch` block is a silent failure — it swallows the exception without any logging or recovery. All empty `Catch` blocks must have at minimum a telemetry call.
- 
-### Detection Pattern
+An empty `Catch`/`catch` block is a silent failure — it swallows the exception without any logging or recovery. All empty blocks must have at minimum a telemetry call.
+
+### VB.NET Detection (language=vb)
+
 ```vb
 Catch ex As Exception
     ' (no statements — empty body)
 End Try
 ```
- 
+
 Also detect:
 ```vb
 Catch
     ' (no exception variable, empty body)
 End Try
 ```
- 
-### Fix Pattern
- 
+
+### C# Detection (language=cs)
+
+```csharp
+catch (Exception)
+{
+    // empty or comment-only
+}
+```
+
+Also detect `catch { }` (untyped empty catch).
+
+### VB.NET Fix Pattern
+
 **Before:**
 ```vb
 Try
@@ -149,7 +233,7 @@ Try
 Catch ex As Exception
 End Try
 ```
- 
+
 **After:**
 ```vb
 Try
@@ -163,7 +247,32 @@ Catch ex As Exception
         })
 End Try
 ```
- 
+
+### C# Fix Pattern
+
+**Before:**
+```csharp
+try
+{
+    SendEmailNotification(caseId);
+}
+catch (Exception)
+{
+}
+```
+
+**After:**
+```csharp
+try
+{
+    SendEmailNotification(caseId);
+}
+catch (Exception ex)
+{
+    // Email notification is non-critical — log and continue
+    _telemetryHelper.TrackException(ex, nameof(SendEmailNotification),
+        new Dictionary<string, string> { ["caseId"] = caseId.ToString() });
+}
 > **Never re-throw inside a non-critical fire-and-forget operation** — but the telemetry call is mandatory.
  
 Log each fix in `docs/code-refactor/exception-handling-report.json`: file path, line number, original pattern, applied fix.
@@ -247,17 +356,13 @@ End Try
  
 | Output | Description |
 |---|---|
-| `BSESystem\Exceptions\BSESystemExceptions.vb` | New domain exception hierarchy file |
+| `BSESystem\Exceptions\BSESystemExceptions.vb` (language=vb) / `BSESystem\Exceptions\BSESystemExceptions.cs` (language=cs) | New domain exception hierarchy file |
 | `docs\code-refactor\exception-handling-report.json` | Structured log: generic catches replaced, empty blocks fixed, EventLog calls replaced, Program.cs middleware wired |
-| All modified `.vb` files | Updated in place |
-| `Program.cs` | Updated with `UseExceptionHandler` middleware wired for global exception handling |
- 
----
- 
+| All modified `.vb` files (language=vb) / `.cs` and `.cshtml.cs` files (language=cs) | Updated in place |
 ## Constraints
 
 - Do **not** add a `Catch` block to every `Try` — only add handling where there is meaningful recovery or logging to apply.
 - Do **not** re-throw inside the `UseExceptionHandler` middleware — it is the terminal boundary.
 - Do **not** expose exception details (stack traces, SQL messages) in user-facing error pages or HTTP responses.
 - Do **not** suppress auth-related exceptions (from ASP.NET Core authentication or SAML middleware) — these must propagate to allow the auth pipeline to handle them correctly.
-- `BSESystem\Exceptions\BSESystemExceptions.vb` is auto-included in SDK-style projects by convention — do **not** add a manual `<Compile>` entry to the project file.
+- `BSESystem\Exceptions\BSESystemExceptions.vb` (or `.cs`) is auto-included in SDK-style projects by convention — do **not** add a manual `<Compile>` entry to the project file.

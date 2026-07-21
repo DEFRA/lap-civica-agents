@@ -1,24 +1,29 @@
 ---
 name: appinsights-logging
-description: Inject Application Insights telemetry for observability which includes log context not personal information .
+description: Inject Application Insights telemetry for observability which includes log context not personal information. Supports both language=vb (VB.NET source) and language=cs (C# source migrated from WebForms).
 ---
  
 # Skill: appinsights-logging
  
 ## Purpose
-Replace all legacy and inconsistent logging mechanisms in VB.NET / ASP.NET WebForms code with Application Insights structured telemetry. Installs the required NuGet packages, wires the `TelemetryClient` through a shared helper, and applies consistent log levels, contextual properties, and operation tracking across the entire codebase.
+Replace all legacy and inconsistent logging mechanisms in migrated `.NET 10` / ASP.NET Core source code with Application Insights structured telemetry. Installs the required NuGet packages, wires the `TelemetryClient` through a shared `TelemetryHelper` (DI-registered scoped service), and applies consistent log levels, contextual properties, and operation tracking across the entire codebase.
+
+The output file extension is determined by the `language` input:
+- **`language=vb`**: creates `TelemetryHelper.vb`; replaces logging in all `.vb` source files.
+- **`language=cs`**: creates `TelemetryHelper.cs`; replaces logging in all `.cs` and `.cshtml.cs` source files.
+
+In both cases `Program.cs` receives the DI registration and the telemetry flush hook — `Program.cs` is always C# regardless of `language`.
  
 ## Trigger Conditions
-- Called after `global-exception-handling` has wired the `UseExceptionHandler` middleware and domain exceptions are in place.
+- Called after `global-exception-handling` has wired the `UseExceptionHandler` middleware and domain exceptions (`BSESystemExceptions.vb` or `BSESystemExceptions.cs`) are in place.
+- The `language` input must be set — it controls the output file extension for `TelemetryHelper` and which source files are scanned for legacy logging patterns.
 - The exception types introduced by `global-exception-handling` are referenced in `TrackException` calls placed by this skill.
  
 ---
  
 ## Step 1 — Install NuGet Packages
  
-Add the following packages to every web project's SDK-style `.vbproj` as `<PackageReference>` items:
-
-```xml
+Add the following packages to every web project's SDK-style `.vbproj` or `.csproj` as `<PackageReference>` items:
 <ItemGroup>
   <PackageReference Include="Microsoft.ApplicationInsights" Version="2.22.0" />
   <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
@@ -58,7 +63,11 @@ builder.Services.AddScoped<TelemetryHelper>();
  
 ## Step 3 — Create Shared TelemetryHelper
 
-Create `BSESystem\Logging\TelemetryHelper.vb`. The helper is DI-registered (scoped) — it receives `TelemetryClient` and `IHttpContextAccessor` via constructor injection. Never create `TelemetryClient` instances directly in application code.
+**Determine the output file based on the `language` input before creating the file.**
+
+### language=vb — Create `BSESystem\Logging\TelemetryHelper.vb`
+
+The helper is DI-registered (scoped) — it receives `TelemetryClient` and `IHttpContextAccessor` via constructor injection. Never create `TelemetryClient` instances directly in application code.
 
 ```vb
 Imports Microsoft.ApplicationInsights
@@ -125,13 +134,67 @@ Namespace BSESystem.Logging
  
 End Namespace
 ```
- 
----
- 
-## Step 4 — Log Level Mapping
- 
-Apply the correct severity level for every logging call replacement:
- 
+
+### language=cs — Create `BSESystem\Logging\TelemetryHelper.cs`
+
+```csharp
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
+using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
+
+namespace BSESystem.Logging;
+
+/// <summary>
+/// Application-wide telemetry wrapper. Registered as a scoped service in Program.cs.
+/// All logging in the application must go through this class.
+/// </summary>
+public class TelemetryHelper
+{
+    private readonly TelemetryClient _client;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public TelemetryHelper(TelemetryClient client, IHttpContextAccessor httpContextAccessor)
+    {
+        _client = client;
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    /// <summary>Log an exception with structured context properties.</summary>
+    public void TrackException(Exception ex, string operation,
+        Dictionary<string, string>? additionalProperties = null)
+    {
+        var props = new Dictionary<string, string>
+        {
+            ["operation"] = operation,
+            ["appVersion"] = GetType().Assembly.GetName().Version?.ToString() ?? "unknown",
+            ["userId"] = _httpContextAccessor.HttpContext?.User?.Identity?.Name ?? "anonymous",
+            ["sessionId"] = _httpContextAccessor.HttpContext?.Session?.Id ?? string.Empty,
+            ["pageUrl"] = _httpContextAccessor.HttpContext?.Request?.Path.Value ?? string.Empty
+        };
+        if (additionalProperties is not null)
+            foreach (var kvp in additionalProperties)
+                props[kvp.Key] = kvp.Value;
+        _client.TrackException(ex, props);
+    }
+
+    /// <summary>Log a diagnostic trace message.</summary>
+    public void TrackTrace(string message, SeverityLevel level, string? operation = null)
+    {
+        var props = new Dictionary<string, string>();
+        if (operation is not null) props["operation"] = operation;
+        _client.TrackTrace(message, level, props);
+    }
+
+    /// <summary>Log a named business event.</summary>
+    public void TrackEvent(string eventName,
+        Dictionary<string, string>? properties = null)
+        => _client.TrackEvent(eventName, properties);
+
+    /// <summary>Flush all pending telemetry.</summary>
+    public void Flush() => _client.Flush();
+}
+```
 | Legacy Pattern | New Call | Level | Notes |
 |---|---|---|---|
 | `EventLog.WriteEntry(..., Error)` / `EventLogEntryType.Error` | `TelemetryHelper.TrackException(ex, ...)` | Error | Wrap in suppressing try/catch (EventLog unavailable on App Service) |
@@ -184,22 +247,43 @@ lifetime.ApplicationStopped.Register(() =>
 ---
  
 ## Step 7 — Replace EventLog.WriteEntry in Catch Blocks
- 
-Where `EventLog.WriteEntry` appears inside a `Catch` block, wrap it in a suppressing try/catch to prevent the secondary exception from masking the original:
- 
+
+Where `EventLog.WriteEntry` appears inside a `Catch`/`catch` block, replace it with a `TelemetryHelper` call.
+
+### VB.NET (language=vb)
+
 ```vb
 ' Before
 Catch ex As Exception
     EventLog.WriteEntry("BSE", ex.Message, EventLogEntryType.Error)
 End Try
- 
+
 ' After
 Catch ex As Exception
     _telemetryHelper.TrackException(ex, "ProcessRecord",
         New Dictionary(Of String, String) From {{"recordId", recordId.ToString()}})
+    Throw
 End Try
 ```
- 
+
+### C# (language=cs)
+
+```csharp
+// Before
+catch (Exception ex)
+{
+    EventLog.WriteEntry("BSE", ex.Message, EventLogEntryType.Error);
+}
+
+// After
+catch (Exception ex)
+{
+    _telemetryHelper.TrackException(ex, nameof(ProcessRecord),
+        new Dictionary<string, string> { ["recordId"] = recordId.ToString() });
+    throw;
+}
+```
+
 > The suppressing try/catch around `EventLog.WriteEntry` is only needed during phased rollout. Once all `EventLog` calls are replaced, no suppressing wrapper is required.
  
 ---
@@ -208,14 +292,10 @@ End Try
  
 | Output | Description |
 |---|---|
-| `BSESystem\Logging\TelemetryHelper.vb` | Shared telemetry wrapper class (DI-registered scoped service) |
+| `BSESystem\Logging\TelemetryHelper.vb` (language=vb) / `BSESystem\Logging\TelemetryHelper.cs` (language=cs) | Shared telemetry wrapper class (DI-registered scoped service) |
 | `appsettings.json` | Updated with `ApplicationInsights.ConnectionString` placeholder |
 | `docs\code-refactor\logging-enhancement-report.json` | Structured log: legacy calls replaced, NuGet packages added, files modified |
-| All modified `.vb` files | Updated in place with `_telemetryHelper` instance calls |
- 
----
- 
-## Constraints
+| All modified `.vb` files (language=vb) / `.cs` files (language=cs) | Updated in place with `_telemetryHelper` instance calls |
  
 - **Never hardcode** the Application Insights Instrumentation Key — use a Key Vault reference via App Service application settings.
 - **Never log** authentication tokens, session cookies, full UPN, or any PII in telemetry properties.

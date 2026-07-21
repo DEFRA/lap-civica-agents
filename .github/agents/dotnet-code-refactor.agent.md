@@ -1,6 +1,6 @@
 ---
 name: dotnet-code-refactor-agent
-description: This agent is specific to 4 civica applications (BSE, Histo, D2R2 and PTLIMS) . Cleans and improves VB.NET / ASP.NET WebForms (post dotnet-framework-upgrade), with strong focus on maintainability, error handling, and logging, without changing business logic.
+description: This agent is specific to 4 civica applications (BSE, Histo, D2R2 and PTLIMS). Cleans and improves VB.NET or C# / ASP.NET Core (post dotnet-framework-upgrade), with strong focus on maintainability, error handling, and logging, without changing business logic. Supports both language=vb (VB.NET source stays VB.NET) and language=cs (source migrated to C# with Razor Pages).
  
 tools: ['search/codebase', 'read/problems', 'edit' ] # specify the tools this agent can use. If not set, all enabled tools are allowed.
 ---
@@ -11,10 +11,10 @@ tools: ['search/codebase', 'read/problems', 'edit' ] # specify the tools this ag
  
 | Order | Skill | Purpose |
 |---|---|---|
-| 1 | `code-cleanup-refactor` | Remove dead code, fix naming, split large methods, catalogue TODOs, remove `On Error Resume Next` |
-| 2 | `global-exception-handling` | Replace generic exceptions with domain types, fix empty catch blocks, wire `UseExceptionHandler` in `Program.cs` |
-| 3 | `appinsights-logging` | Replace legacy logging with Application Insights structured telemetry |
-| 4 | `build-validation` | Restore packages and run MSBuild; iterate until zero errors |
+| 1 | `code-cleanup-refactor` | Remove dead code, fix naming, split large methods, catalogue TODOs; remove `On Error Resume Next` (VB.NET) or empty `catch` blocks and undocumented `#pragma` suppressions (C#); populate Razor Page PageModel stubs from WebForms code-behind (C# path) |
+| 2 | `global-exception-handling` | Replace generic exceptions with domain types (`.vb` or `.cs` output based on `language`), fix empty catch blocks in both languages, wire `UseExceptionHandler` in `Program.cs` |
+| 3 | `appinsights-logging` | Replace legacy logging with Application Insights structured telemetry; generate `TelemetryHelper.vb` or `TelemetryHelper.cs` based on `language` |
+| 4 | `build-validation` | Restore packages and run `dotnet build`; handle both `CS*` (C#) and `BC*` (VB.NET) compiler errors; iterate until zero errors |
 | 5 | `html-report-generator` | Produce the styled HTML conversion report from all skill outputs |
  
 ### Skill References
@@ -29,7 +29,8 @@ tools: ['search/codebase', 'read/problems', 'edit' ] # specify the tools this ag
  
 | Parameter | Required | Description | Example |
 |---|---|---|---|
-| `solutionFolder` | ✅ Yes | Absolute or relative path to the repository root containing the `.sln` file | `C:\Projects\BSE` |
+| `solutionFolder` | ✅ Yes | Absolute or relative path to the repository root containing the `.sln` file | `C:\Projects\BSE\src` |
+| `language` | ✅ Yes | Source language of the migrated application: `vb` (VB.NET source remains VB.NET) or `cs` (source migrated to C#). Controls which cleanup patterns apply and the file extension of all generated files (`TelemetryHelper`, `BSESystemExceptions`, etc.). | `cs` |
 | `reportOutputFolder` | No | Folder where the HTML report is written (default: `<solutionFolder>\docs\code-refactor`) | `C:\Projects\BSE\docs\code-refactor` |
  
 ## Output Contract
@@ -52,18 +53,22 @@ tools: ['search/codebase', 'read/problems', 'edit' ] # specify the tools this ag
 - Fix build errors and warnings arising from code changes (via the `build-validation` skill)
 - Generate an HTML conversion report with professional CSS styling clearly documenting what changes were performed (via the `html-report-generator` skill)
 ### 1.1 Code Cleanup
-- Remove dead and unreachable code (unreferenced `Module`, unused `Imports`, orphaned event handlers)
-- Improve naming conventions: PascalCase for Public members, camelCase for local variables, remove Hungarian notation prefixes
+- **language=vb**: Remove dead and unreachable code (unreferenced `Module`, unused `Imports`, orphaned `Handles` event handlers)
+- **language=cs**: Remove dead and unreachable code (unreferenced classes, unused `using` directives, dead `.aspx.cs` code-behind logic, `HttpContext.Current` usages replaced with `IHttpContextAccessor`)
+- **language=cs**: Populate Razor Page PageModel (`.cshtml.cs`) `OnGet`/`OnPost` stub methods by migrating business logic from the corresponding WebForms code-behind
+- Improve naming conventions: PascalCase for public members, camelCase for local variables and parameters, remove Hungarian notation prefixes; C# async methods must have `Async` suffix
 - Split large methods (>50 lines) and classes (>300 lines) into focused, single-responsibility units
 - Catalogue all `TODO`, `FIXME`, and `HACK` comments with file reference, line number, and recommended action — do not remove without approval
-- Remove `On Error Resume Next` patterns — replace with structured `Try`/`Catch`/`Finally` blocks (see 1.2)
+- **language=vb**: Remove `On Error Resume Next` patterns — replace with structured `Try`/`Catch`/`Finally` blocks (see 1.2)
+- **language=cs**: Remove undocumented `#pragma warning disable` suppressions — fix nullable (`CS8600`–`CS8670`) warnings at the root cause instead of suppressing
  
 ### 1.2 Error Handling Improvement
-- Replace all empty `Catch` blocks with structured handling: log the exception via Application Insights then re-throw or return a typed error result
-- Replace `Catch ex As Exception` with domain-specific exception types from the application exception hierarchy
-- Domain exception hierarchy base. For example, for a BSE Application: `BSEException` → `DataAccessException`, `ValidationException`, `IntegrationException`
+- Replace all empty `Catch`/`catch` blocks with structured handling: log the exception via Application Insights then re-throw or return a typed error result
+- **language=vb**: Replace `Catch ex As Exception` with domain-specific exception types
+- **language=cs**: Replace `catch (Exception)` with domain-specific exception types; fix untyped `catch { }` blocks
+- Domain exception hierarchy base (generated as `.vb` or `.cs` based on `language`). For example, for a BSE Application: `BSEException` → `DataAccessException`, `ValidationException`, `IntegrationException`, `NotFoundException`
 - Wire the global exception handler as `UseExceptionHandler` middleware in `Program.cs` — route all unhandled exceptions through it; `Global.asax` `Application_Error` is dead code in .NET 10 and must not be used
-- Ensure all `Catch` blocks that suppress exceptions contain at minimum an Application Insights `_telemetryHelper.TrackException` call
+- Ensure all catch blocks that suppress exceptions contain at minimum an Application Insights `_telemetryHelper.TrackException` call
  
 ### 1.3 Logging Enhancement
 - Replace `EventLog.WriteEntry`, `Debug.Print`, and `Response.Write` debug output with Application Insights structured telemetry
@@ -79,8 +84,11 @@ tools: ['search/codebase', 'read/problems', 'edit' ] # specify the tools this ag
  
 
 ## 2. Success Criteria
-- Zero `On Error Resume Next` statements remain in any `.vb` file
-- Zero empty `Catch` blocks remain
-- Zero `EventLog.WriteEntry` calls remain in any `.vb` file
+- **language=vb**: Zero `On Error Resume Next` statements remain in any `.vb` file
+- **language=cs**: Zero empty `catch {}` blocks remain in any `.cs` file; zero undocumented `#pragma warning disable` suppressions remain
+- Zero empty `Catch`/`catch` blocks remain across all source files
+- Zero `EventLog.WriteEntry` calls remain in any source file
+- **language=cs**: All Razor Page PageModel stubs have `OnGet`/`OnPost` handlers migrated from WebForms code-behind
 - `UseExceptionHandler` middleware is wired in `Program.cs` and redirects to safe Razor Page error routes
 - `TelemetryHelper` is the sole logging entry point across the codebase
+- Solution builds with zero errors (`CS*` and `BC*`) after all changes
