@@ -146,7 +146,7 @@ Execution model: **instruction-only with sequential skill gates and complexity-t
   │  Terraform HCL or CloudFormation YAML per function
   ▼
 5. test-stub-generation ← all Lane 1 + Lane 2 services
-  │  xUnit (dotnet8 / dotnet10) with mocked AWS SDK
+  │  xUnit (dotnet10) with mocked AWS SDK
   ▼
 6. high-complexity-review ← Lane 3 services only
   │  Review brief produced; no handler code written
@@ -167,7 +167,7 @@ migration-output/
 ├── migration-plan.json
 ├── handlers/
 │   └── <ServiceName>/
-│       ├── Function.cs          (dotnet8 runtime)
+│       ├── Function.cs          (dotnet10 runtime)
 │       ├── <ServiceName>.csproj
 │       └── aws-lambda-tools-defaults.json
 ├── terraform/

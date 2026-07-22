@@ -13,7 +13,7 @@ decommission.
 ## Step 1 — Determine Test Framework
 
 Read `migration-plan.json → decisions.lambdaRuntime`:
-- `dotnet8` or `dotnet10` → xUnit test project (`.csproj` + C# test files)
+- `dotnet10` → xUnit test project (`.csproj` + C# test files)
 
 ---
 
@@ -221,7 +221,7 @@ public class HandlerTests
 
 After generating all test projects:
 
-**dotnet8 / dotnet10**:
+**dotnet10**:
 ```bash
 dotnet build migration-output/tests/<ServiceName>.Tests/<ServiceName>.Tests.csproj
 dotnet test migration-output/tests/<ServiceName>.Tests/ --no-build --logger "console;verbosity=normal"

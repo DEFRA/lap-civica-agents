@@ -76,7 +76,7 @@ For each Lane 1 / Lane 2 service, produce a summary card:
 ├─────────────────────────────────────────────────────────────┤
 │  Original Trigger  │ System.Timers.Timer @ 300,000ms         │
 │  Lambda Trigger    │ EventBridge rate(5 minutes)              │
-│  Runtime           │ dotnet8                                  │
+│  Runtime           │ dotnet10                                 │
 │  Timeout           │ 300s                                     │
 │  Memory            │ 256 MB                                   │
 │  IaC               │ Terraform — main.tf + variables.tf       │

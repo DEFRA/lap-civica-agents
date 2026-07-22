@@ -181,7 +181,7 @@ High-complexity services are branched to `review-high-complexity` instead of han
 | `solutionFolder` | ✅ Yes | Absolute path to repository root | `C:\Projects\BatchProcessor` |
 | `sourceFramework` | ✅ Yes | Framework moniker of the service projects | `net40`, `net462`, `net48` |
 | `iacToolchain` | ✅ Yes | IaC output format | `terraform` or `cloudformation` |
-| `lambdaRuntime` | ✅ Yes | Target Lambda runtime | `dotnet8` or `dotnet10` |
+| `lambdaRuntime` | ✅ Yes | Target Lambda runtime | `dotnet10` |
 | `awsRegion` | ✅ Yes | Deployment region | `eu-west-2` |
 | `secretsBackend` | No | Secret storage service | `secrets-manager` (default) or `ssm-parameter-store` |
 | `vpcEnabled` | No | Whether Lambda functions run inside a VPC | `true` / `false` (default: `false`) |

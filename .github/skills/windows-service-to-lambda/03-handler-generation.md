@@ -23,20 +23,18 @@ this skill.
    dotnet --list-sdks
    ```
 2. Parse the output. Each line has the format `<Major>.<Minor>.<Patch> [<path>]`.
-3. Select the entry with the **highest major version** (e.g. `9.0.306` → major `9`).
+3. Select the entry with the **highest major version** (e.g. `10.0.100` → major `10`).
 4. Derive values:
 
    | Detected SDK major | `<HighestSdkTfm>` | `<detectedRuntime>` |
    |--------------------|-------------------|---------------------|
-   | 8                  | `net8.0`          | `dotnet8`           |
-   | 9                  | `net9.0`          | `dotnet9`           |
    | 10                 | `net10.0`         | `dotnet10`          |
    | N (future)         | `netN.0`          | `dotnetN`           |
 
 5. Store `<HighestSdkTfm>` and `<detectedRuntime>` as variables. Substitute them in all
    generated `.csproj`, `aws-lambda-tools-defaults.json`, and README.md files below.
-6. If no .NET SDK is installed (command not found), default to `net8.0` / `dotnet8` and emit
-   a `⚠ WARNING: dotnet SDK not detected — defaulting to dotnet8. Verify before deploying.`
+6. If no .NET SDK is installed (command not found), default to `net10.0` / `dotnet10` and emit
+   a `⚠ WARNING: dotnet SDK not detected — defaulting to dotnet10. Verify before deploying.`
    comment in all generated files.
 
 ---
@@ -46,7 +44,7 @@ this skill.
 1. Load `migration-output/migration-plan.json`.
 2. Extract `servicePlans` where `lane` is `1` or `2`.
 3. For each service, read:
-   - `runtime` (`dotnet8` or `dotnet10`)
+   - `runtime` (`dotnet10`)
    - `handler` string (for dotnet runtimes only)
    - `timeoutSeconds`
    - `memorySizeMb`
@@ -97,7 +95,7 @@ private void OnTimerElapsed(object sender, ElapsedEventArgs e)
     ProcessBatch();
 }
 
-// MIGRATED — Lambda handler entry point (dotnet8)
+// MIGRATED — Lambda handler entry point (dotnet10)
 // MIGRATED FROM: OnTimerElapsed callback (System.Timers.Timer, 300000ms interval)
 // Trigger: EventBridge Scheduler rate(5 minutes)
 public async Task FunctionHandler(ScheduledEvent evnt, ILambdaContext context)
@@ -111,7 +109,7 @@ public async Task FunctionHandler(ScheduledEvent evnt, ILambdaContext context)
 
 ## Step 3 — Generate Handler Files (dotnet10 runtime)
 
-For each Lane 1 / Lane 2 service with `runtime: "dotnet9"` or `"dotnet10"`:
+For each Lane 1 / Lane 2 service with `runtime: "dotnet10"`:
 
 ### 3.1 — Project File
 

@@ -208,7 +208,7 @@ resource "aws_cloudwatch_log_group" "lambda_logs" {
 resource "aws_lambda_function" "service" {
   function_name = local.function_name
   role          = aws_iam_role.lambda_exec.arn
-  runtime       = "<lambdaRuntime>"   # dotnet8 or dotnet10
+  runtime       = "<lambdaRuntime>"   # dotnet10
   handler       = "<handler>"         # from migration-plan.json
   timeout       = var.lambda_timeout_seconds
   memory_size   = var.lambda_memory_mb

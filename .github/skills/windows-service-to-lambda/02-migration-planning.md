@@ -29,7 +29,7 @@ no decision may be left implicit or derived at a later step.
 | # | Question | Allowed Values | Default |
 |---|----------|---------------|---------|
 | A1 | What IaC toolchain should be used? | `terraform`, `cloudformation` | — (required) |
-| A2 | What Lambda runtime should be used? **Auto-detect** by running `dotnet --list-sdks` on the local machine, selecting the highest major version, and mapping to the runtime identifier (e.g. SDK 10.x → `dotnet10`). Override only if the target Lambda execution environment differs from the local SDK. | `dotnet8`, `dotnet10` | Auto-detected from local SDK |
+| A2 | What Lambda runtime should be used? **Auto-detect** by running `dotnet --list-sdks` on the local machine, selecting the highest major version, and mapping to the runtime identifier (e.g. SDK 10.x → `dotnet10`). Override only if the target Lambda execution environment differs from the local SDK. | `dotnet10` | Auto-detected from local SDK |
 | A3 | What is the target AWS region? | Any valid AWS region code, e.g. `eu-west-2` | — (required) |
 
 ### Block B — Networking
@@ -149,7 +149,7 @@ Write `migration-output/migration-plan.json`:
       "timeoutRisk": false,
       "timeoutMitigation": null,
       "lambdaFunctionName": "batch-processor-service",
-      "runtime": "dotnet8",
+      "runtime": "dotnet10",
       "handler": "BatchProcessorService::BatchProcessorService.Function::FunctionHandler",
       "timeoutSeconds": 300,
       "memorySizeMb": 256,
