@@ -445,49 +445,6 @@ Upgrades a .NET solution from any source framework version to a specified target
 
 ---
 
-### .NET Upgrade Agent
-
-**Entry point**: `.github/agents/dotnet-upgrade.agent.md`
-
-End-to-end upgrade agent for **multiple SDK-style .NET solutions in a single batched run**. Discovers components, plans, dry-runs, executes TFM and package upgrades, builds and tests, reverts failures to a manual-review list, and produces per-component commits with a consolidated batch report. Supports ASP.NET Web API, Azure Functions v4 isolated, class libraries, and test projects.
-
-**Modes**:
-
-| Mode | Trigger | Behaviour |
-|---|---|---|
-| **Full run** | default | Gates → Phases A–F per batch with checkpoints |
-| **Dry-run** | `dryRun: true` or say "preview" | Discovery report + diff preview only — no file writes, no branches |
-| **Assessment only** | say "assess" | Assessment phase only; stops after report |
-| **Single project** | one `.csproj` in scope | Skip Phase A; run B–D; append to existing report |
-| **Resume** | partial state detected | Continue from where stopped; skip already-upgraded projects |
-
-**Skills** (under `.github/skills/dotnet-upgrade/`):
-
-| Skill | Purpose |
-|-------|---------|
-| `dotnet-upgrade-assessment` | Classify components, identify blocked dependencies, produce upgrade plan |
-| `dotnet-inventory` | Discover and label all components as `ready` / `blocked` / `manual review` |
-| `dotnet-dependency-modernize` | Build package-replacement plan |
-| `dotnet-upgrade` | Apply TFM and package edits per component |
-| `dotnet-functions-isolated` | Align host.json, Program.cs, and worker SDK for Azure Functions v4 isolated |
-| `dotnet-build-test-fix` | Build and test with up to 3 auto-fix iterations; revert on persistent failure |
-| `dotnet-upgrade-reporting` | Write per-run batch report and final consolidated upgrade report |
-
-**Key outputs**:
-
-- `docs/dotnet-upgrade/upgrade-inventory.md` — component readiness labels
-- `docs/dotnet-upgrade/package-replacements.md` — per-package version changes
-- `docs/dotnet-upgrade/upgrade-notes.md` — automated fixes applied
-- `docs/dotnet-upgrade/manual-review-list.md` — reverted/blocked components
-- `docs/dotnet-upgrade/upgrade-reports/<yyyyMMdd>.md` — per-batch summary
-- `docs/dotnet-upgrade/upgrade-report.md` — final consolidated report
-- `docs/dotnet-upgrade/lessons-learned.md` — auto-updated fix knowledge base
-- Per-component branch + structured commit (never pushed automatically)
-
-> **When to use `dotnet-upgrade` vs `dotnet-framework-upgrade`**: Use this agent for **multiple SDK-style projects** (ASP.NET Core, Azure Functions, class libraries) where you need batched execution, git branching, revert-on-failure, and a lessons-learned knowledge base. Use [`dotnet-framework-upgrade`](#net-framework-upgrade-agent) for a **single classic .NET Framework solution** (WebForms, VB.NET, `packages.config`, `web.config`).
-
----
-
 ### .NET Test Automation and Quality Agent
 
 **Entry point**: `.github/agents/dotnet-test-automation-and-quality-agent.md`
@@ -552,49 +509,15 @@ Generates a Playwright E2E behavioural baseline test suite for a pre-migration W
 
 **Entry point**: `.github/agents/windows-service-to-lambda.agent.md`
 
-Migrates scheduled and event-driven .NET Framework 4.x Windows Service executables to AWS Lambda serverless functions. Reads existing service source code, generates equivalent Lambda handlers in C# (.NET 9 isolated worker) or Python 3.12, produces Terraform HCL or CloudFormation YAML for all supporting infrastructure, and outputs integration test stubs with mocked AWS SDK clients. Generic and reusable — not tied to any specific application name or business domain.
+Migrates scheduled and event-driven .NET Framework 4.x Windows Service executables to AWS Lambda serverless functions. Reads existing service source code, generates equivalent Lambda handlers in C# (.NET 10 isolated worker), produces Terraform HCL or CloudFormation YAML for all supporting infrastructure, and outputs integration test stubs with mocked AWS SDK clients. Generic and reusable — not tied to any specific application name or business domain.
 
 **Target triggers**: EventBridge Scheduler, SQS Queue, S3 Event Notifications
 
 **Key outputs**:
 
-- Lambda function code in C# (.NET 9) or Python 3.12
+- Lambda function code in C# (.NET 10)
 - Terraform HCL or CloudFormation YAML for Lambda, EventBridge, SQS, DLQ, RDS Proxy
 - Integration test stubs with mocked AWS SDK clients
 - Migration report documenting refactored patterns
 
 ---
-
-### VB.NET → C# .NET 10 + WebUI → MVC Modernizer
-
-**Entry point**: `.github/agents/vbnet-to-csharp-net10-mvc-modernizer.agent.md`
-
-Modernises a legacy VB.NET / WebForms solution to a C# 14 / .NET 10 ASP.NET Core MVC solution. Preserves business logic (syntactical translation only), keeps the rendered UI visually similar to the legacy screens, uses the latest stable NuGet packages, and scaffolds xUnit tests with a build-and-verify gate.
-
-**Modes**:
-
-- **`analyse`** — Inventory projects, `.aspx` pages, code-behind, NuGet packages, `Web.config`, and risk patterns; produce `modernisation-analysis.json`.
-- **`plan`** — Interview the user for decision gates (auth, data access, logging, JSON, layout, namespace, CSS); produce `modernisation-plan.json`.
-- **`scaffold`** — Create an empty modular-monolith .NET 10 solution (`.slnx` first, `.sln` fallback) with Core / Infrastructure / Web / Tests projects; verify build + tests pass.
-- **`convert-backend`** — Translate VB.NET class libraries to C# 14 file-by-file with no behavioural change.
-- **`convert-ui`** — Convert `.aspx` / `.ascx` / `.master` to MVC Controllers + Razor Views + ViewModels + `wwwroot/`; preserve visual layout.
-- **`generate-tests`** — Generate xUnit test projects using `WebApplicationFactory<Program>`, Moq, and FluentAssertions.
-- **`build-and-verify`** — Run `dotnet build`, `dotnet test`, and smoke `curl` probes against the running site.
-- **`full-pipeline`** — End-to-end orchestration ending in `modernisation-report.md`.
-
-**Skill**: `.github/skills/vbnet-to-csharp-net10-mvc-modernizer/vbnet-csharp-mvc-modernisation.skill.md`
-
-**Key outputs**:
-
-- `modernisation-analysis.json` and `modernisation-plan.json`
-- Modernised solution under `modernised/` (Core / Infrastructure / Web MVC / Tests, `net10.0`, `LangVersion=14.0`, SDK-style projects, `PackageReference`)
-- Controllers, Razor views, ViewModels, `_Layout.cshtml`, `wwwroot/` assets
-- xUnit test projects with happy-path controller and service tests
-- `build-report.md` (build + test + smoke evidence) and `modernisation-report.md` (file map, deferred items, package-swap impact, visual-parity checklist)
-
-**Risk mitigation**:
-
-- Backend conversion is **syntactical only**; algorithmic changes require explicit user sign-off per file
-- Visual parity is mandatory — field order, labels, column layout, and button placement must match the legacy screens
-- Package swaps with behaviour impact (e.g. `Newtonsoft.Json` ↔ `System.Text.Json`) are listed and confirmed before generation
-- Risky idioms (`On Error Resume Next`, late binding, `Server.Transfer`, `UpdatePanel`, custom HTTP modules) are surfaced as manual-review items rather than silently translated
