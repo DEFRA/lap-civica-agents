@@ -1,7 +1,7 @@
 # Skill: build-validation
  
-> **Note — Canonical skill location**: The full, reusable version of this skill (supporting both
-> MSBuild classic and dotnet CLI modern build modes) lives at
+> **Note — Canonical skill location**: The full, reusable version of this skill (supporting
+> dotnet CLI modern build modes) lives at
 > `.github/skills/dotnet-framework-upgrade/build-validation.md`.
 > This copy is the **application-specific override** for the `dotnet-code-refactor` agent.
 > This copy applies **Mode B (dotnet CLI modern)** for Classic→Modern upgrade paths.
@@ -62,7 +62,7 @@ For each remaining compiler error after initial build:
 2. Determine root cause based on error prefix:
 
    **C# errors (`CS*`) 
-   
+
    - `CS0246` / `CS0234` — missing `using` or type not found — namespace moved in upgraded package or `TelemetryHelper`/exception type not yet created.
    - `CS1061` — method or property does not exist — API change in upgraded package; use the modern replacement.
    - `CS8600`–`CS8670` — nullable reference — add null checks or null-forgiving operator only where the value is guaranteed non-null.
