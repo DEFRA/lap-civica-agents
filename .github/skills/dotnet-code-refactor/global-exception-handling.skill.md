@@ -142,29 +142,33 @@ For each occurrence, determine which domain exception type is most appropriate b
 | Resource lookup (GetById, FindByName) that can return nothing | `NotFoundException` |
 | All others where no specific type can be determined | Keep `Exception` but add structured logging |
 
-### VB.NET Replacement Pattern (language=vb)
-
 **Before:**
-```vb
-Try
-    sqlCmd.ExecuteNonQuery()
-Catch ex As Exception
-    lblError.Text = ex.Message
-End Try
+```csharp
+try
+{
+    sqlCmd.ExecuteNonQuery();
+}
+catch (Exception ex)
+{
+    lblError.Text = ex.Message;
+}
 ```
 
 **After:**
-```vb
-Try
-    sqlCmd.ExecuteNonQuery()
-Catch ex As SqlException
-    Throw New DataAccessException("Failed to save record.", "SaveRecord", ex)
-Catch ex As Exception
-    Throw New BSEException("Unexpected error during save.", ex)
-End Try
+```csharp
+try
+{
+    sqlCmd.ExecuteNonQuery();
+}
+catch (SqlException ex)
+{
+    throw new DataAccessException("Failed to save record.", "SaveRecord", ex);
+}
+catch (Exception ex)
+{
+    throw new BSEException("Unexpected error during save.", ex);
+}
 ```
-
-### C# Replacement Pattern (language=cs)
 
 **Before:**
 ```csharp
@@ -198,7 +202,7 @@ catch (Exception ex)
  
 An empty `Catch`/`catch` block is a silent failure — it swallows the exception without any logging or recovery. All empty blocks must have at minimum a telemetry call.
 
-### VB.NET Detection (language=vb)
+PROBE_S3_VB
 
 ```vb
 Catch ex As Exception
@@ -356,13 +360,13 @@ End Try
  
 | Output | Description |
 |---|---|
-| `BSESystem\Exceptions\BSESystemExceptions.vb` (language=vb) / `BSESystem\Exceptions\BSESystemExceptions.cs` (language=cs) | New domain exception hierarchy file |
+| `BSESystem\Exceptions\BSESystemExceptions.cs` | New domain exception hierarchy file |
 | `docs\code-refactor\exception-handling-report.json` | Structured log: generic catches replaced, empty blocks fixed, EventLog calls replaced, Program.cs middleware wired |
-| All modified `.vb` files (language=vb) / `.cs` and `.cshtml.cs` files (language=cs) | Updated in place |
+| All modified `.cs` and `.cshtml.cs` files | Updated in place |
 ## Constraints
 
 - Do **not** add a `Catch` block to every `Try` — only add handling where there is meaningful recovery or logging to apply.
 - Do **not** re-throw inside the `UseExceptionHandler` middleware — it is the terminal boundary.
 - Do **not** expose exception details (stack traces, SQL messages) in user-facing error pages or HTTP responses.
 - Do **not** suppress auth-related exceptions (from ASP.NET Core authentication or SAML middleware) — these must propagate to allow the auth pipeline to handle them correctly.
-- `BSESystem\Exceptions\BSESystemExceptions.vb` (or `.cs`) is auto-included in SDK-style projects by convention — do **not** add a manual `<Compile>` entry to the project file.
+- `BSESystem\Exceptions\BSESystemExceptions.cs` is auto-included in SDK-style projects by convention — do **not** add a manual `<Compile>` entry to the project file.

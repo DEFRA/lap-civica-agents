@@ -42,7 +42,6 @@ Produce a single, self-contained `.html` file with embedded CSS. Do not referenc
  
 #### 2. Framework Upgrade
 - Table: File | Old Version | New Version | Status
-- **Classic→Classic** changes: `web.config` diffs — `httpRuntime targetFramework` and `requestValidationMode` before/after
 - **Classic→Modern** changes (when `pathType` = Classic→Modern):
   - Project file conversion: `.vbproj` classic format → SDK-style with `<TargetFramework>net10.0</TargetFramework>`
   - `web.config` `<appSettings>` keys migrated to `appsettings.json` — list of keys moved (values masked if sensitive)
