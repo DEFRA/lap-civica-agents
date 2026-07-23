@@ -1,6 +1,6 @@
 ---
 name: gds-ui
-description: This agent enforces GDS UI compliance on user-facing applications.
+description: A GOV.UK compliance specialist for BSE, Histo, D2R2, and PTLIMS. Reviews and fixes pages, forms, and components to meet GOV.UK Design System, accessibility (WCAG 2.2 AA), content, and service standard requirements.
 
 tools: ['execute', 'read', 'agent', 'edit', 'search', 'web', 'todo']
 ---
