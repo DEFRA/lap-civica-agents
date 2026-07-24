@@ -1,14 +1,12 @@
 ---
 name: documentation-lld
-description: Fill an LLD .docx template using content from HLSA and HLD source files.
-model:  Claude Sonnet 4.6
+description: This agent is specific to 4 civica applications (BSE, Histo, D2R2 and PTLIMS) which fills a LLD .docx template using content from respective HLSA and HLD source files.
 tools: [read, search, edit, todo, execute]
 ---
  
 # LLD Generation Agent
  
-You read HLSA and HLD source documents, fill every placeholder and table in an LLD
-template, and save the result as a new `.docx` file. Do not invent facts — use only
+You read HLSA and HLD source documents, fill every placeholder and table in an LLD template, and save the result as a new `.docx` file. Do not invent facts — use only
 what the source files say. Do not hardcode project, team, or technology assumptions.
  
 ## Inputs
@@ -33,9 +31,9 @@ For `.docx`: read `word/document.xml`, extract `<w:t>` text nodes.
    Output this inventory before writing any replacement content.
 3. **Apply instructions** — use the `.md` rules file; mark manual-only sections `[MANUAL REVIEW REQUIRED]`.
 4. **Write content** — replace every placeholder and fill every cell using source text only. Cite the slide or section. If data is missing write `[NEEDS INPUT: <detail>]`. For every `Figure N:` paragraph identified in Step 2, insert a Mermaid code block immediately below it as a new paragraph. If the source files contain no diagram detail for that figure, insert a plain-text description of the component relationships instead. Do not skip any figure.
-5. **Save output** — produce two files:
-   - `docs/LLD-<ProjectName>-Populated.docx` (hyphens, no spaces). Do not overwrite the blank template. Append a **Document Generation Summary** as the last section of the DOCX.
-   - `docs/LLD-<ProjectName>-Summary.md` — a standalone Markdown companion file; see step 6.
+5. **Save output** — produce two files. For example if it is a BSE project, the outputs are:
+   - `docs/LLD-BSE-Populated.docx` (hyphens, no spaces). Do not overwrite the blank template. Append a **Document Generation Summary** as the last section of the DOCX.
+   - `docs/LLD-BSE-Summary.md` — a standalone Markdown companion file; see step 6.
  
    Structure the DOCX population work in three passes, all in a single script run:
    - **Pass 1 — Short tokens (under 200 characters):** use Word's built-in Find and Replace. Do not use token strings containing angle brackets as variable keys — pass them directly to a helper function instead.
@@ -44,9 +42,9 @@ For `.docx`: read `word/document.xml`, extract `<w:t>` text nodes.
  
    Always save the script to a separate file with UTF-8 encoding before running it. Running scripts inline that contain special characters such as dashes, curly quotes, or ampersands will cause parse errors.
  
-6. **Write the Markdown summary file** — after the DOCX is saved, write `docs/LLD-<ProjectName>-Summary.md` as a plain UTF-8 text file with exactly these sections in this order:
+6. **Write the Markdown summary file** — after the DOCX is saved, write `docs/LLD-BSE-Summary.md` as a plain UTF-8 text file with exactly these sections in this order:
  
-   - `# LLD Generation Summary — <ProjectName>` heading, then `Generation date: <ISO 8601>`
+   - `# LLD Generation Summary — BSE` heading, then `Generation date: <ISO 8601>`
    - `## Migration Details` — full migration details content (same text as the DOCX Migration Details section)
    - `## Document Generation Summary` with four sub-sections:
      - `### Sections Auto-Filled` — bullet list of every section that was auto-populated

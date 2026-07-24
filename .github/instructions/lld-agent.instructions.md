@@ -1,14 +1,14 @@
 ---
-description: 'LLD Agent generation instructions'
+description: 'LLD Agent generation instructions used to generate civica specific LLD documents from respective HLSA and HLD source files. This file is used by the documentation-lld agent to fill a LLD .docx template with content from the source files.'
 applyTo: '**'
 ---
  
 # LLD Agent Instructions
  
-## 1. Who Are We
-- **Project:** [Project Name]
-- **Team:** [Team Name]
-- **Cloud:** [Azure / AWS / GCP]
+## 1. Who Are We . For Which Project Are We Generating This LLD? For example, for BSE Project:
+- **Project:** [BSE]
+- **Team:** [LAP Civica Migration Team]
+- **Cloud:** [Azure]
  
 ---
  
@@ -60,7 +60,7 @@ Mark these with: `[MANUAL REVIEW REQUIRED]`
  
 ## 7. Output — DOCX File (MANDATORY)
  
-- The final output must be saved as `docs/LLD-<ProjectName>-Populated.docx`.
+- The final output must be saved as `docs/LLD-BSE-Populated.docx`.
 - The blank template (`LLD-Template.docx`) must **not** be overwritten — always save as a new file.
 - All `<placeholder>` tokens in the template must be replaced with generated content.
 - All empty table cells must be populated. For tables where the technology is not applicable to this project (for example, API Gateway or Service Bus where the architecture does not use them), populate the first data cell with `N/A — [reason and source reference]`. Do not leave any cell blank.
@@ -112,4 +112,4 @@ When the insert function finds the target heading and takes the next paragraph, 
 
 ## 13. Document Generation Summary — Companion Markdown File Only, Not in DOCX
 
-The Document Generation Summary (auto-filled sections, manual review flags, needs-input list, assumptions, confidence ratings) must be written only to the companion `docs/LLD-<ProjectName>-Summary.md` file. Do not append a Document Generation Summary section to the DOCX. The DOCX must end at the last substantive content section that was present in the template — no summary appendix is added to the Word document.
+The Document Generation Summary (auto-filled sections, manual review flags, needs-input list, assumptions, confidence ratings) must be written only to the companion `docs/LLD-BSE-Summary.md` file. Do not append a Document Generation Summary section to the DOCX. The DOCX must end at the last substantive content section that was present in the template — no summary appendix is added to the Word document.
