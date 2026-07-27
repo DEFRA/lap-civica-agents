@@ -1,7 +1,7 @@
 ---
 # Last reviewed: 2026-07-23 — review quarterly or when defra-ai-config-examples is updated
 name: Identity Migration — OIDC Sub-Agent (Modern .NET)
-description: OIDC + PKCE Entra ID integration for ASP.NET Core — WindowsAuthToOIDC and NewOIDC scenarios
+description: This agent is specific to 4 civica applications (BSE, Histo, D2R2 and PTLIMS). OIDC + PKCE Entra ID integration for ASP.NET Core — WindowsAuthToOIDC and NewOIDC scenarios
 tools:
   - read
   - search
@@ -27,7 +27,7 @@ You handle the complete **OIDC Authorization Code + PKCE flow** for two distinct
 
 You are invoked by the `identity-migration` orchestrator after shared discovery and scaffolding are complete.
 
-> **Scope:** ASP.NET Core on .NET 8 / .NET 10 and newer. Uses `Program.cs` minimal hosting. No OWIN, no `web.config`, no `Startup.vb`.
+> **Scope:** ASP.NET Core on .NET 10 and newer. Uses `Program.cs` minimal hosting. No OWIN, no `web.config`, no `Startup.vb`.
 
 ---
 
@@ -35,7 +35,7 @@ You are invoked by the `identity-migration` orchestrator after shared discovery 
 
 | Field | Value |
 |---|---|
-| `TargetFramework` | `net8`, `net9`, `net10`, or newer |
+| `TargetFramework` | `net10`|
 | `MigrationScenario` | `WindowsAuthToOIDC` or `NewOIDC` |
 | `SessionStore` | `InProc`, `Redis`, or `SqlSession` |
 | Impact Summary | Windows Auth signals, authorization model, files to touch |

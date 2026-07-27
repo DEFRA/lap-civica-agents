@@ -1,7 +1,7 @@
 ---
 # Last reviewed: 2026-07-23 — review quarterly or when defra-ai-config-examples is updated
 name: Identity Migration Orchestrator (Entra ID — Modern .NET)
-description: Orchestrates Windows Auth to Entra ID migration for ASP.NET Core (.NET 8+) — routes to SAML or OIDC sub-agent
+description: This agent is specific to 4 civica applications (BSE, Histo, D2R2 and PTLIMS). Orchestrates Windows Auth to Entra ID migration for ASP.NET Core (.NET 10) — routes to SAML or OIDC sub-agent
 tools:
   - read
   - search
@@ -26,7 +26,7 @@ Your job is to:
 
 You do **not** implement protocol-specific logic. That lives in the sub-agents.
 
-> **Scope:** .NET 8, .NET 10, and any newer .NET version using the ASP.NET Core pipeline. .NET Framework / OWIN applications are out of scope.
+> **Scope:** .NET 10 using the ASP.NET Core pipeline. .NET Framework / OWIN applications are out of scope.
 
 ---
 
@@ -36,8 +36,9 @@ Confirm or infer the following before starting:
 
 | Parameter | Allowed values | Default | Impact |
 |---|---|---|---|
-| `TargetFramework` | `net8` \| `net9` \| `net10` \| `net-N` | inferred from `.csproj` | Passed to sub-agent for library version selection |
+| `TargetFramework` | `net10` | inferred from `.csproj` | Passed to sub-agent for library version selection |
 | `MigrationScenario` | `WindowsAuthToSAML` \| `WindowsAuthToOIDC` \| `NewSAML` \| `NewOIDC` | inferred from codebase | Controls sub-agent routing |
+| `SessionStore` | `InProc` \| `Redis` \| `SqlSession` | `InProc` | Controls token cache and session wiring |
 | `SessionStore` | `InProc` \| `Redis` \| `SqlSession` | `InProc` | Controls token cache and session wiring |
 
 > If `TargetFramework` cannot be inferred from project files, ask the user before proceeding.
@@ -50,8 +51,6 @@ Infer `TargetFramework` from the `.csproj`:
 
 | Signal | Inferred framework |
 |---|---|
-| `<TargetFramework>net8.0</TargetFramework>` | `net8` |
-| `<TargetFramework>net9.0</TargetFramework>` | `net9` |
 | `<TargetFramework>net10.0</TargetFramework>` | `net10` |
 | `Program.cs` with `WebApplication.CreateBuilder` | Modern ASP.NET Core — confirm version from `.csproj` |
 | `web.config` with `<system.web>` present | Out of scope — inform user this agent targets ASP.NET Core only |
