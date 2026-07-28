@@ -1,3 +1,29 @@
+---
+name: security-code
+version: 2.1.0
+description: >
+  ITHC Security Findings Scanner — multi-layer vulnerability detection (SAST, SCA,
+  Secrets, IaC, AI-assisted) with UK Government ITHC-format report generation.
+  Aligned with Defra AI Toolkit v1.0, OWASP Top 10 (2021), CWE Top 25, and NCSC Cyber Essentials.
+model: gpt-4o
+tools:
+  - codebase
+  - terminal
+skills:
+  - .github/skills/security-code/SKILL.md
+data_classification: Official
+pii_redaction: true
+send_to_external_ai: false
+owner: LAP Civica Migration Team (DEFRA)
+support: AICapabilityAndEnablement@defra.gov.uk
+governed_by: Defra AI Toolkit v1.0
+defra_ai_toolkit_url: https://digital.defra.gov.uk/ai-toolkit
+audit_log: true
+created: 2025-01-01
+updated: 2026-07-27
+agent_id: security-code-2.1.0
+---
+
 # ITHC Security Findings Scanner Agent
 ## Version 2.1.0 — Defra AI Standards Compliant
 
@@ -10,7 +36,7 @@
 
 This agent scans a codebase and generates a security findings report aligned with the **ITHC (IT Health Check)** spreadsheet format used in UK Government engagements. It combines **SAST** (Static Analysis), **SCA** (Software Composition Analysis), **Secrets Scanning**, **IaC Review**, and **AI-assisted pattern detection** to identify the full breadth of vulnerabilities across a project.
 
-**Defra Commitment:** This agent is designed to operate safely and responsibly per Defra AI Toolkit standards. See [Responsible Use](#responsible-use) and [AI Limitations & Ethics](#ai-limitations--ethics).
+**Defra Commitment:** This agent is designed to operate safely and responsibly per Defra AI Toolkit standards. See [Responsible Use](#responsible-use-defra-ai-toolkit-alignment) and [AI Limitations & Ethics](#ai-limitations--ethics-transparency).
 
 ```
 Name:        ITHC Security Findings Scanner Agent
@@ -34,6 +60,37 @@ Output:      CSV / XLSX / Markdown / JSON — ITHC findings format
 | **Updated** | 2026-07 | Defra compliance update |
 | **Owner** | LAP Civica Migration Team (DEFRA) | Organizational accountability |
 | **Support** | AICapabilityAndEnablement@defra.gov.uk | Incident/ethical concerns reporting |
+
+---
+
+## Required Skill Files & Directory Structure
+
+This agent depends on the following skill and reference files. All files **must** be present before the agent is invoked. The agent will load `SKILL.md` automatically at runtime using the `codebase` tool before beginning any analysis step.
+
+```
+.github/
+└── skills/
+    └── security-code/
+        ├── SKILL.md                          ← Core scan instructions (auto-loaded)
+        ├── templates/
+        │   ├── security-code-scanner-report-template.md ← ITHC findings table (columns A–W)
+        │   └── management-summary-template.md← Executive / management summary
+        └── references/
+            ├── known-fp-patterns.md          ← Known LLM false-positive patterns
+            ├── cwe-owasp-mapping.md          ← CWE → OWASP Top 10 mapping table
+            └── severity-sla.md              ← Severity SLA & escalation thresholds
+```
+
+| File | Purpose | Required | Auto-loaded |
+|---|---|---|---|
+| `.github/skills/security-code/SKILL.md` | Core scan workflow, ITHC schema, Defra rules | ✅ Yes | ✅ Yes — on every invocation |
+| `.github/skills/security-code/templates/security-code-scanner-report-template.md` | ITHC findings report template (columns A–W, v2.1 schema) | ✅ Yes | On report generation |
+| `.github/skills/security-code/templates/management-summary-template.md` | Management / executive summary template | ✅ Yes | On report generation |
+| `.github/skills/security-code/references/known-fp-patterns.md` | Documented LLM false-positive patterns to suppress | ✅ Yes | During AI-assisted analysis |
+| `.github/skills/security-code/references/cwe-owasp-mapping.md` | CWE ID → OWASP Top 10 (2021) category mapping | ✅ Yes | During finding enrichment |
+| `.github/skills/security-code/references/severity-sla.md` | CVSSv3.1 severity bands, deadlines, escalation paths | ✅ Yes | During scoring |
+
+> ⚠️ **Defra Compliance Note:** If any required file is missing, the agent **must** halt, log a structured error to the observability trail, and instruct the operator to restore the missing file before re-running. Do not proceed with partial skill files.
 
 ---
 
@@ -212,9 +269,9 @@ Choose the **right scan mode** for the task:
 | R | Remediation Deadline | Based on severity SLA |
 | S | Retested | Yes / No |
 | T | Retest Date | Date of retest if applicable |
-| U | Notes | False positive flags, suppression reason, **AI confidence if LLM-sourced** |
-| **V** | **Source Tool** | **NEW in v2.1:** SAST / SCA / Secrets / IaC / **AI-Assisted** — for transparency |
-| **W** | **AI Confidence** | **NEW in v2.1:** 0.0–1.0 if sourced from LLM; blank if SAST/SCA/Secrets |
+| U | Notes | False positive flags, suppression reason, manual review tags, risk acceptance records |
+| **V** | **Source Tool** | **NEW in v2.1:** `SAST` / `SCA` / `Secrets` / `IaC` / `AI-Assisted` — for full transparency |
+| **W** | **AI Confidence** | **NEW in v2.1:** `0.0–1.0` if sourced from LLM; blank if SAST / SCA / Secrets / IaC |
 
 ---
 
@@ -254,17 +311,19 @@ DEFRA AI TOOLKIT COMPLIANCE STATEMENT — v2.1.0
 ✅ This report is generated by an agent aligned with Defra AI Standards.
 
 📊 Report Statistics:
-   - Total Findings: 47
-   - From SAST Tools: 32 (68%)
-   - From SCA Tools: 10 (21%)
-   - From AI-Assisted Analysis: 5 (11%, ⚠️ manual review recommended)
-   - PII Redacted: 3 instances
-   - Secrets Redacted: 2 instances
+   - Total Findings:               {{TOTAL_FINDINGS}}
+   - From SAST Tools:              {{COUNT_SAST}} ({{PCT_SAST}}%)
+   - From SCA Tools:               {{COUNT_SCA}} ({{PCT_SCA}}%)
+   - From Secrets Scanning:        {{COUNT_SECRETS}} ({{PCT_SECRETS}}%)
+   - From IaC Analysis:            {{COUNT_IAC}} ({{PCT_IAC}}%)
+   - From AI-Assisted Analysis:    {{COUNT_AI}} ({{PCT_AI}}%, ⚠️ manual review recommended)
+   - PII Instances Redacted:       {{PII_REDACTED}}
+   - Secrets Instances Redacted:   {{SECRETS_REDACTED}}
 
-🔐 Data Classification: Official
-📅 Scan Date: 2026-07-24 14:32:00 UTC
+🔐 Data Classification: {{DATA_CLASSIFICATION}}
+📅 Scan Date: {{SCAN_DATE}} UTC
 🔧 Agent: security-code-2.1.0
-⏱️ Duration: 12m 34s (scan_mode: critical-only)
+⏱️ Duration: {{DURATION}} (scan_mode: {{SCAN_MODE}})
 
 ⚠️  AI Limitations Notice:
    - AI-assisted findings have ~75% accuracy; always pair with human review
@@ -341,24 +400,41 @@ START
 ## Migration Notes (v2.0 → v2.1)
 
 - **Breaking Changes:** None; backward compatible
-- **New Columns:** V (Source Tool), W (AI Confidence)
-- **New Metadata:** Agent version, scan date, AI stats in footer
+- **New Columns:** V (Source Tool), W (AI Confidence) — already added to all templates
+- **New Metadata:** Agent version, scan date, AI stats in report footer (using `{{PLACEHOLDER}}` tokens)
 - **New Flags:** `--data-classification`, `--enable-observability-log`, `--pii-redaction` (default: true)
+- **New Skill Files:** `references/known-fp-patterns.md`, `references/cwe-owasp-mapping.md`, `references/severity-sla.md`, `templates/management-summary-template.md`
+- **Fixed:** Report footer statistics now use `{{PLACEHOLDER}}` tokens (was hardcoded example values)
+- **Fixed:** Agent `tools` now uses valid GitHub Copilot tool names (`codebase`, `terminal`)
 - **Deprecated:** None
-
-**Recommendation:** Update templates in `.github/skills/security-code/templates/` to include columns V & W for consistency.
 
 ---
 
 ## References
 
+### 📁 Local Skill Files (Required)
+
+| File | Role |
+|---|---|
+| `.github/skills/security-code/SKILL.md` | Core agent instructions — loaded automatically |
+| `.github/skills/security-code/templates/security-code-scanner-report-template.md` | ITHC output template |
+| `.github/skills/security-code/templates/management-summary-template.md` | Management summary template |
+| `.github/skills/security-code/references/known-fp-patterns.md` | False positive suppression list |
+| `.github/skills/security-code/references/cwe-owasp-mapping.md` | CWE to OWASP mapping |
+| `.github/skills/security-code/references/severity-sla.md` | SLA and escalation reference |
+
+### 🌐 External Standards
+
 - [Defra AI Toolkit](https://digital.defra.gov.uk/ai-toolkit) — Framework & standards
-- [OWASP Top 10 2021](https://owasp.org/Top10/) — Web app security
-- [CWE Top 25](https://cwe.mitre.org/top25/) — Software weaknesses
-- [NCSC Cyber Essentials](https://www.ncsc.gov.uk/cyberessentials) — UK Gov baseline
-- [CVSS v3.1](https://www.first.org/cvss/v3.1/specification-document) — Scoring standard
-- [PTES Technical Guideline](http://www.pentest-standard.org/) — Penetration testing
-- [NIST SP 800-115](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-115.pdf) — Security testing
+- [Defra: Using Data with AI](https://digital.defra.gov.uk/ai-toolkit/guidance/using-data-with-ai) — Data governance
+- [OWASP Top 10 2021](https://owasp.org/Top10/) — Web application security
+- [CWE Top 25](https://cwe.mitre.org/top25/) — Most dangerous software weaknesses
+- [NCSC Cyber Essentials](https://www.ncsc.gov.uk/cyberessentials) — UK Government security baseline
+- [CVSS v3.1 Specification](https://www.first.org/cvss/v3.1/specification-document) — Vulnerability scoring
+- [PTES Technical Guideline](http://www.pentest-standard.org/) — Penetration testing standard
+- [NIST SP 800-115](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-115.pdf) — Technical guide to security testing
+- [OWASP ASVS v4.0](https://owasp.org/www-project-application-security-verification-standard/) — Application security verification
+- [UK GDPR / Data Protection Act 2018](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/) — Data protection compliance
 
 ---
 
