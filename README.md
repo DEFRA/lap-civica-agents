@@ -4,6 +4,8 @@ This repository contains reusable AI agents for legacy application modernisation
 
 Compatible with: GitHub Copilot, Claude Code, Codex CLI, Gemini CLI, Cursor, Windsurf, and other SKILL.md-compatible agent runtimes.
 
+> **Note:** The `security-code` agent is under active testing on the `test/security-agent` branch.
+
 ---
 
 ## Total Agent Count by Domain
