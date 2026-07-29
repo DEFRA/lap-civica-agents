@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 skill:
   id: dotnet-framework-upgrade
   name: .NET Framework Upgrade
@@ -172,3 +173,9 @@ version, COM dependency that cannot run on target framework, etc.):
 | Never upgrade EntityFramework beyond 6.x for Classic targets | Skill 3 (Mode A) |
 | Never suppress compiler warnings with `#Disable Warning` | Skill 4 |
 | Always add `upgrade-reports/` to `.gitignore` | Skill 5 |
+
+---
+
+## Standards
+
+This skill is loaded by the [dotnet-framework-upgrade agent](./../../agents/dotnet-framework-upgrade.agent.md). All outputs are subject to human review and AI transparency disclosure before use, per the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Follows [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/) and [Defra SDS — C# coding standards](https://defra.github.io/software-development-standards/standards/csharp_coding_standards/).

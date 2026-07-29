@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 skill:
   id: devops-pipeline-modernizer
   name: DevOps Pipeline Modernizer
@@ -45,3 +46,9 @@ Suggested usage prompts:
 - [05 GitHub Actions Templates](./05-github-actions-templates.md)
 - [06 Deployment Config & Environments](./06-deployment-config-and-environments.md)
 - [07 Validation, Security, Rollout & Checklist](./07-validation-security-rollout-checklist.md)
+
+---
+
+## Standards
+
+This skill is loaded by the [devops-pipeline-modernizer agent](./../../agents/devops-pipeline-modernizer.agent.md). All outputs are subject to human review and AI transparency disclosure before use, per the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Follows [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/).

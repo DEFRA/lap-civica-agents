@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: e2e-baseline-validator
 description: "Reviews baseline results, proposes corrections, and writes the sign-off report."
 tools: [read, edit, todos]
@@ -152,8 +153,22 @@ update `docs/e2e-baseline/baseline-results.json`:
   corrected `selector-registry/*.selectors.json` files, and corrected
   `Pages/{PageName}Page.cs` files (JS timing only).
  
-## References
- 
-- `.github/skills/e2e-baseline/references/baseline-validation-guide.md` — failure classification decision tree and correction patterns
-- [DEFRA AI Toolkit — Working with agents](https://digital.defra.gov.uk/ai-toolkit/guidance/working-with-agents)
+---
+
+## Compliance & Governance
+
+Classified as **MEDIUM RISK** under the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Requires:
+
+- **Human sign-off** — `"status": "signed-off"` must only be set on explicit human instruction conveyed via the orchestrator; the agent must never self-approve the baseline.
+- **AI transparency** — the baseline report must state it was AI-assisted and name the human reviewer.
+- **Feature branch** — all corrections committed on a named branch; reviewed via PR before merging to `main`, per the [Defra SDS Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+
+### [Defra SDS Alignment](https://defra.github.io/software-development-standards/guides/github_copilot/)
+
+Follows the [Defra SDS GitHub Copilot Guide](https://defra.github.io/software-development-standards/guides/github_copilot/), [Quality Assurance Standards](https://defra.github.io/software-development-standards/standards/quality_assurance_standards/), and [Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+
+## References — failure classification decision tree and correction patterns
+- [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/)
+- [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai)
+- [Defra AI Toolkit — Working with agents](https://digital.defra.gov.uk/ai-toolkit/guidance/working-with-agents)
 - [Playwright locator documentation](https://playwright.dev/docs/locators)

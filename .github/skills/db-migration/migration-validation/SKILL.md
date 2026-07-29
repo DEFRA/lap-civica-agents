@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: migration-validation
 description: >
   Validate that the migrated database matches the source in structure and data.
@@ -103,6 +104,12 @@ If both databases are accessible and contain stored procedures/functions:
 | Procedure                   | Test Input | Source Output      | Target Output      | Match   |
 | --------------------------- | ---------- | ------------------ | ------------------ | ------- |
 | `calculate_total(order_id)` | `12345`    | `1,234.56`         | `1,234.56`         | ✅ PASS |
+
+---
+
+## Standards
+
+This skill is loaded by the [db-migration agent](./../../../agents/db-migration.agent.md). All outputs are subject to human review and AI transparency disclosure before use, per the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Follows [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/).
 | `get_user_roles(user_id)`   | `42`       | `['admin','user']` | `['admin','user']` | ✅ PASS |
 
 ### Step 7 — Generate Validation Report

@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 description: >
   Transform requirements documents (Word, Excel, PDF, Markdown, plain text)
   into a CSV file for bulk upload to Jira or Azure DevOps. Extracts one user
@@ -659,3 +660,29 @@ Step 7 — Done! Import instructions:
 - **FORBIDDEN**: Reading files other than the user-provided requirements document
 - **FORBIDDEN**: Writing files to system directories or unapproved paths
 - **FORBIDDEN**: Mass deletion, destructive file operations, or overwriting files without confirmation
+
+---
+
+## Compliance & Governance
+
+Classified as **MEDIUM RISK** under the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Requires:
+
+- **Human review** before any AI-generated CSV is uploaded to Jira or Azure DevOps.
+- **AI transparency** — the generated CSV and any covering PR must disclose AI assistance.
+- **Data protection** — requirements documents may contain personal or OFFICIAL-SENSITIVE data; do not submit such content to an AI model without confirming it is permissible under the applicable Defra data handling agreement.
+- **No formula injection** — enforced via CSV sanitisation rules in the Security Constraints section above.
+- **Scope limitation** — this agent produces a CSV file only; no direct API calls to Jira or Azure DevOps.
+
+### [Defra SDS Alignment](https://defra.github.io/software-development-standards/guides/github_copilot/)
+
+Follows the [Defra SDS GitHub Copilot Guide](https://defra.github.io/software-development-standards/guides/github_copilot/), [Security Standards](https://defra.github.io/software-development-standards/standards/security_standards/), and [Common Coding Standards](https://defra.github.io/software-development-standards/standards/common_coding_standards/).
+
+## References
+
+- [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/)
+- [Defra SDS — Security standards](https://defra.github.io/software-development-standards/standards/security_standards/)
+- [Defra SDS — Common coding standards](https://defra.github.io/software-development-standards/standards/common_coding_standards/)
+- [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai)
+- [Defra AI Toolkit — Keeping data safe](https://digital.defra.gov.uk/ai-toolkit/guidance/keeping-data-safe)
+- [Defra AI Toolkit — Security guidance](https://digital.defra.gov.uk/ai-toolkit/guidance/security)
+- [Defra AI Config Examples — Agents guide](https://github.com/DEFRA/defra-ai-config-examples/blob/main/pages/agents/index.md)

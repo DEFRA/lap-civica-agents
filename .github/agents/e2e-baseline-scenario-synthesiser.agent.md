@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: e2e-baseline-scenario-synthesiser
 description: "Reads all page assets and synthesises test scenarios covering every user-observable behaviour."
 tools: [read, search, edit, todos, thinking]
@@ -203,9 +204,24 @@ Set `"status": "complete"` after all scenarios are written.
 - Write only `docs/e2e-baseline/asset-manifests/{PageName}.assets.json` and
   `docs/e2e-baseline/scenario-catalogue/{PageName}.scenarios.json`.
  
-## References
- 
-- `.github/skills/e2e-baseline/references/asset-analysis-procedure.md` — 10-step file resolution order and what to extract per file type
+---
+
+## Compliance & Governance
+
+Classified as **MEDIUM RISK** under the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Requires:
+
+- **Human review** before synthesised scenarios are used as the basis for test generation.
+- **Evidence-based output only** — scenarios must cite source evidence; no invented behaviour.
+- **Read-only access** — this agent must not edit any source file.
+- **Feature branch** — all outputs committed on a named branch; reviewed via PR before merging to `main`, per the [Defra SDS Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+
+### [Defra SDS Alignment](https://defra.github.io/software-development-standards/guides/github_copilot/)
+
+Follows the [Defra SDS GitHub Copilot Guide](https://defra.github.io/software-development-standards/guides/github_copilot/), [Quality Assurance Standards](https://defra.github.io/software-development-standards/standards/quality_assurance_standards/), and [Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+
+## References — 10-step file resolution order and what to extract per file type
 - `.github/skills/e2e-baseline/references/scenario-synthesis-rules.md` — per-category rules, naming, and evidence requirements
-- [DEFRA AI Toolkit — Token optimisation](https://digital.defra.gov.uk/ai-toolkit/patterns/token-optimisation)
-- [DEFRA AI Toolkit — Working with agents](https://digital.defra.gov.uk/ai-toolkit/guidance/working-with-agents)
+- [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/)
+- [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai)
+- [Defra AI Toolkit — Token optimisation](https://digital.defra.gov.uk/ai-toolkit/patterns/token-optimisation)
+- [Defra AI Toolkit — Working with agents](https://digital.defra.gov.uk/ai-toolkit/guidance/working-with-agents)

@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: DevOps Pipeline Modernizer
 description: Generate parameterized CI/CD pipelines for a single .NET 10 repository by reading the solution file, discovering web and database projects, and producing environment-driven deployment templates for dev, test, pre-prod, and prod. Azure infrastructure is pre-provisioned and referenced from a repo config file.
 argument-hint: Tell me whether you use Azure DevOps or GitHub Actions and where the solution file and current pipelines are located.
@@ -147,3 +148,28 @@ For modernization requests, respond with:
 - Do pre-prod and prod require manual approvals, and who approves?
 
 If any detail is unknown, generate a sensible default and clearly label it as an assumption.
+
+---
+
+## Compliance & Governance
+
+Classified as **MEDIUM RISK** under the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Requires:
+
+- **Human review** before any AI-generated output is used, merged, or deployed.
+- **AI transparency** — PR descriptions must disclose AI assistance and name the reviewer.
+- **Feature branch** — all changes on a named branch; reviewed via PR before merging to `main`, per the [Defra SDS Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+- **No hardcoded secrets** — credentials sourced from Key Vault or environment variables only.
+- **SonarQube** — all AI-generated pipeline code must pass static analysis before merge.
+
+### [Defra SDS Alignment](https://defra.github.io/software-development-standards/guides/github_copilot/)
+
+Follows the [Defra SDS GitHub Copilot Guide](https://defra.github.io/software-development-standards/guides/github_copilot/), [Security Standards](https://defra.github.io/software-development-standards/standards/security_standards/), and [Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+
+## References
+
+- [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/)
+- [Defra SDS — Security standards](https://defra.github.io/software-development-standards/standards/security_standards/)
+- [Defra SDS — Git branching strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/)
+- [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai)
+- [Defra AI Toolkit — Security guidance](https://digital.defra.gov.uk/ai-toolkit/guidance/security)
+- [Defra AI Config Examples — Agents guide](https://github.com/DEFRA/defra-ai-config-examples/blob/main/pages/agents/index.md)

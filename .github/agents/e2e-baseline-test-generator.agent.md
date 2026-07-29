@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: e2e-baseline-test-generator
 description: "Generates C# Selectors class, Page Object, and NUnit test spec for one page from JSON artefacts."
 tools: [read, edit, search, todos]
@@ -189,8 +190,24 @@ or helper methods it generates.
 - Do not modify any existing generated file from a previous page invocation
   except `Config/Routes.cs` (which is additive-only).
  
-## References
- 
-- `.github/skills/e2e-baseline/references/test-generation-patterns.md` — exact C# patterns for every generated file type
-- [Defra software development standards — C# coding standards](https://defra.github.io/software-development-standards/standards/csharp_coding_standards/)
+---
+
+## Compliance & Governance
+
+Classified as **MEDIUM RISK** under the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Requires:
+
+- **Human review** before generated test files are merged to `main`.
+- **AI transparency** — PR descriptions must disclose that test code was AI-generated and name the reviewer.
+- **Feature branch** — all generated test files committed on a named branch; reviewed via PR before merging to `main`, per the [Defra SDS Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+- **Read-only source access** — this agent must never edit `.aspx`, `.vb`, `.cs`, or `.js` source files.
+- **SonarQube** — generated C# test code must pass static analysis before merge.
+
+### [Defra SDS Alignment](https://defra.github.io/software-development-standards/guides/github_copilot/)
+
+Follows the [Defra SDS GitHub Copilot Guide](https://defra.github.io/software-development-standards/guides/github_copilot/), [C# Coding Standards](https://defra.github.io/software-development-standards/standards/csharp_coding_standards/), [Quality Assurance Standards](https://defra.github.io/software-development-standards/standards/quality_assurance_standards/), and [Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+
+## References — exact C# patterns for every generated file type
+- [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/)
+- [Defra SDS — C# coding standards](https://defra.github.io/software-development-standards/standards/csharp_coding_standards/)
+- [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai)
 - [Playwright .NET documentation](https://playwright.dev/dotnet/docs/intro)

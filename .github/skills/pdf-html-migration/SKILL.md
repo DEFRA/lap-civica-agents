@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: pdf-html-migration
 description: >
   Use when replacing a programmatic PDF generation library (TallPDF, iText,
@@ -80,8 +81,14 @@ until the current one passes all static code review checks.
 library's output is in version control and auditable.
 
 **Use the smallest model appropriate to each phase** — per [Defra AI Toolkit — Sustainability](https://digital.defra.gov.uk/ai-toolkit/guidance/sustainability), use the smallest model that meets each phase's needs. Discovery (Step 1) and static review validation (Step 4) are pattern-matching and file-inspection tasks that do not require a frontier model. Infrastructure setup (Step 3) and report conversion (Step 4) involve generating new C# and Razor code and benefit from a larger model.
- 
+
 **Generic by design** — the discovery agent uses heuristic patterns, not
 library-specific knowledge. The conversion patterns describe constructs by
 function, not by TallPDF class name. The same skill works for iText, FastReport,
 and Crystal Reports codebases.
+
+---
+
+## Standards
+
+This skill is loaded by the [pdf-migration-orchestrator agent](./../../agents/pdf-migration-orchestrator.agent.md). All outputs are subject to human review and AI transparency disclosure before use, per the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Follows [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/).

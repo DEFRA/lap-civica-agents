@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: pdf-validation
 description: Static code review of a migrated Razor report. Checks translation and security correctness. One report per invocation.
 tools: [read, edit, search, execute]
@@ -138,16 +139,27 @@ Return:
 - Never mark static review passed if any applicable check failed.
 - The `htmlRawUsedWithTrustAnnotation` check and all `owasp` checks are required — not optional.
  
-## References
- 
-- [Defra AI Toolkit — Security](https://digital.defra.gov.uk/ai-toolkit/guidance/security) — AI-generated code must pass the same OWASP and security gates as hand-written code
-- [Defra software development standards — Security standards (OWASP)](https://defra.github.io/software-development-standards/standards/security_standards/)
-- [Defra software development standards — Quality assurance and test standards](https://defra.github.io/software-development-standards/standards/quality_assurance_standards/)
-- [Defra software development standards — C# coding standards](https://defra.github.io/software-development-standards/standards/csharp_coding_standards/)
-- [Defra AI config examples — Agents guide](https://github.com/DEFRA/defra-ai-config-examples/blob/main/pages/agents/index.md)
-- List of any `// MIGRATION-FIX:` annotations found (for human review)
- 
 ---
+
+## Compliance & Governance
+
+Classified as **MEDIUM RISK** under the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Requires:
+
+- **Human review** before any static review pass/fail result is used to gate the migration pipeline.
+- **Never modify source** — this agent must not modify application source code under any circumstance.
+- **OWASP checks mandatory** — `htmlRawUsedWithTrustAnnotation` and all `owasp` checks are required, not optional.
+- **Feature branch** — all validation reports committed on a named branch; reviewed via PR before merging to `main`, per the [Defra SDS Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+
+### [Defra SDS Alignment](https://defra.github.io/software-development-standards/guides/github_copilot/)
+
+Follows the [Defra SDS GitHub Copilot Guide](https://defra.github.io/software-development-standards/guides/github_copilot/), [Security Standards](https://defra.github.io/software-development-standards/standards/security_standards/), [Quality Assurance Standards](https://defra.github.io/software-development-standards/standards/quality_assurance_standards/), and [Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+
+## References(https://defra.github.io/software-development-standards/standards/security_standards/)
+- [Defra SDS — Quality assurance and test standards](https://defra.github.io/software-development-standards/standards/quality_assurance_standards/)
+- [Defra SDS — C# coding standards](https://defra.github.io/software-development-standards/standards/csharp_coding_standards/)
+- [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai)
+- [Defra AI Toolkit — Security](https://digital.defra.gov.uk/ai-toolkit/guidance/security) — AI-generated code must pass the same OWASP and security gates as hand-written code
+- [Defra AI Config Examples — Agents guide](https://github.com/DEFRA/defra-ai-config-examples/blob/main/pages/agents/index.md)
  
 ## Guardrails
  

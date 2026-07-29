@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: e2e-baseline-runner
 description: "Runs the generated C# Playwright test project and writes categorised baseline-results.json."
 tools: [read, edit, execute, todos]
@@ -119,8 +120,22 @@ Write `docs/e2e-baseline/baseline-results.json` with:
   and the `.trx` file produced by `dotnet test`.
 - Do not modify `e2e-baseline.config.json`.
  
-## References
- 
-- [DEFRA AI Toolkit — Security](https://digital.defra.gov.uk/ai-toolkit/guidance/security) — human approval before command execution; OWASP injection prevention
-- [DEFRA AI Toolkit — Working with agents](https://digital.defra.gov.uk/ai-toolkit/guidance/working-with-agents)
+---
+
+## Compliance & Governance
+
+Classified as **MEDIUM RISK** under the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Requires:
+
+- **Human review** before test results are accepted as a signed-off baseline.
+- **Input validation** — `outputProjectName` must be validated against `^[A-Za-z0-9._-]+$` before being used in any command; see Step 1 of the Procedure.
+- **Feature branch** — all outputs committed on a named branch; reviewed via PR before merging to `main`, per the [Defra SDS Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+- **AI transparency** — the baseline results file must record the agent version and run date.
+
+### [Defra SDS Alignment](https://defra.github.io/software-development-standards/guides/github_copilot/)
+
+Follows the [Defra SDS GitHub Copilot Guide](https://defra.github.io/software-development-standards/guides/github_copilot/), [Security Standards](https://defra.github.io/software-development-standards/standards/security_standards/), [Quality Assurance Standards](https://defra.github.io/software-development-standards/standards/quality_assurance_standards/), and [Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+
+## References(https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai)
+- [Defra AI Toolkit — Security](https://digital.defra.gov.uk/ai-toolkit/guidance/security) — human approval before command execution; OWASP injection prevention
+- [Defra AI Toolkit — Working with agents](https://digital.defra.gov.uk/ai-toolkit/guidance/working-with-agents)
 - [Playwright .NET documentation](https://playwright.dev/dotnet/docs/intro)

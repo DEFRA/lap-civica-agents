@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 applyTo:
   - "**/*.cs"
   - "**/Program.cs"
@@ -82,6 +83,17 @@ Do **not** propose:
 - SAML (when ITfoxtec already referenced): `ITfoxtec.Identity.Saml2`
 
 ---
+
+## References
+
+- [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/)
+- [Defra SDS — C# coding standards](https://defra.github.io/software-development-standards/standards/csharp_coding_standards/)
+- [Defra SDS — Security standards](https://defra.github.io/software-development-standards/standards/security_standards/)
+- [Defra SDS — Logging standards](https://defra.github.io/software-development-standards/standards/logging/)
+- [Defra SDS — Credential exposure process](https://defra.github.io/software-development-standards/processes/credential_exposure/)
+- [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai)
+- [Defra AI Toolkit — Security guidance](https://digital.defra.gov.uk/ai-toolkit/guidance/security)
+- [Defra AI Toolkit — Keeping data safe](https://digital.defra.gov.uk/ai-toolkit/guidance/keeping-data-safe)
 
 ## Testing Requirements
 

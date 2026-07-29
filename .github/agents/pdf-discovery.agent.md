@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: pdf-discovery
 description: Scans a .NET codebase to inventory all PDF report classes and output report-inventory.json.
 tools: [read, search, edit]
@@ -181,9 +182,23 @@ cannot be found), set `"status": "incomplete"` and record the specific gap in
 - Do not score complexity based on subjective assessment — apply the scoring
   table in Step 7 mechanically.
  
-## References
- 
-- [Defra AI config examples — Agents guide](https://github.com/DEFRA/defra-ai-config-examples/blob/main/pages/agents/index.md) — principle of least privilege: read-only agents restrict the `edit` tool to their single output file
+---
+
+## Compliance & Governance
+
+Classified as **MEDIUM RISK** under the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Requires:
+
+- **Human review** before `report-inventory.json` is accepted as the authoritative input to downstream migration agents.
+- **Read-only operation** — only `report-inventory.json` may be written; no source file may be modified.
+- **Evidence-based output** — every finding must cite the file path and class/method name; no speculation.
+- **Feature branch** — all outputs committed on a named branch; reviewed via PR before merging to `main`, per the [Defra SDS Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+
+### [Defra SDS Alignment](https://defra.github.io/software-development-standards/guides/github_copilot/)
+
+Follows the [Defra SDS GitHub Copilot Guide](https://defra.github.io/software-development-standards/guides/github_copilot/), [Common Coding Standards](https://defra.github.io/software-development-standards/standards/common_coding_standards/), [Security Standards](https://defra.github.io/software-development-standards/standards/security_standards/), and [Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+
+## References(https://defra.github.io/software-development-standards/standards/common_coding_standards/)
+- [Defra SDS — C# coding standards](https://defra.github.io/software-development-standards/standards/csharp_coding_standards/)
+- [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai)
 - [Defra AI Toolkit — Security](https://digital.defra.gov.uk/ai-toolkit/guidance/security) — AI-generated code held to the same standards as hand-written code
-- [Defra software development standards — Common coding standards](https://defra.github.io/software-development-standards/standards/common_coding_standards/)
-- [Defra software development standards — C# coding standards](https://defra.github.io/software-development-standards/standards/csharp_coding_standards/)
+- [Defra AI Config Examples — Agents guide](https://github.com/DEFRA/defra-ai-config-examples/blob/main/pages/agents/index.md) — principle of least privilege: read-only agents restrict the `edit` tool to their single output file

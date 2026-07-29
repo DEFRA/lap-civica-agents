@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 description: 'Playwright .NET test generation instructions'
 applyTo: '**'
 ---
@@ -77,8 +78,37 @@ public class MovieSearchTests : PageTest
                         - img ""poster of The Garfield Movie""
                         - heading ""The Garfield Movie"" [level=2]
             ");
-        });
-    }
+        });    }
+}
+```
+
+## Test Execution Strategy
+
+1. **Initial Run**: Execute tests with `dotnet test` or using the test runner in your IDE
+2. **Debug Failures**: Analyse test failures and identify root causes
+3. **Iterate**: Refine locators, assertions, or test logic as needed
+4. **Validate**: Ensure tests pass consistently and cover the intended functionality
+5. **Report**: Provide feedback on test results and any issues discovered
+
+## Quality Checklist
+
+Before finalising tests, ensure:
+
+- [ ] All locators are accessible and specific and avoid strict mode violations
+- [ ] Tests are grouped logically and follow a clear structure
+- [ ] Assertions are meaningful and reflect user expectations
+- [ ] Tests follow consistent naming conventions
+- [ ] Code is properly formatted and commented
+
+---
+
+## References
+
+- [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/)
+- [Defra SDS — C# coding standards](https://defra.github.io/software-development-standards/standards/csharp_coding_standards/)
+- [Defra SDS — Quality assurance and test standards](https://defra.github.io/software-development-standards/standards/quality_assurance_standards/)
+- [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai)
+- [Playwright .NET documentation](https://playwright.dev/dotnet/docs/intro)    }
 }
 ```
 

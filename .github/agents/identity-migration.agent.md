@@ -1,5 +1,5 @@
 ---
-# Last reviewed: 2026-07-23 — review quarterly or when defra-ai-config-examples is updated
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: Identity Migration Orchestrator (Entra ID — Modern .NET)
 description: This agent is specific to 4 civica applications (BSE, Histo, D2R2 and PTLIMS). Orchestrates Windows Auth to Entra ID migration for ASP.NET Core (.NET 10) — routes to SAML or OIDC sub-agent
 tools:
@@ -190,14 +190,33 @@ Assemble the final delivery artifact from sub-agent output(s). If both ran in pa
 
 ---
 
+## Compliance & Governance
+
+Classified as **HIGH RISK** under the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Requires:
+
+- **Human review at every stage** — no AI-generated auth code is merged without explicit human approval.
+- **Second reviewer** — mandatory for all security-critical authentication changes.
+- **AI transparency** — PR descriptions must state that code was AI-assisted, name the second reviewer, and confirm all quality gates passed.
+- **No bypass of quality gates** — SonarQube (zero new critical/high findings), ≥80% coverage, and secret scanning must all pass.
+- **Feature branch** — all changes on a named branch (`feature/identity-migration-<appname>`); reviewed via PR before merging to `main`, per the [Defra SDS Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+- **No sensitive data in AI context** — do not feed token payloads, SAML assertions, or personal claim data to an AI model without a confirmed Defra data handling agreement.
+
+### [Defra SDS Alignment](https://defra.github.io/software-development-standards/guides/github_copilot/)
+
+Follows the [Defra SDS GitHub Copilot Guide](https://defra.github.io/software-development-standards/guides/github_copilot/), [C# Coding Standards](https://defra.github.io/software-development-standards/standards/csharp_coding_standards/), [Security Standards](https://defra.github.io/software-development-standards/standards/security_standards/), [Logging Standards](https://defra.github.io/software-development-standards/standards/logging/), [Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/), and [Credential Exposure Process](https://defra.github.io/software-development-standards/processes/credential_exposure/).
+
 ## References
 
 - `.github/instructions/auth.instructions.md` — authentication and identity rules (.NET Framework 4.8)
 - `.github/instructions/auth-aspnetcore.instructions.md` — authentication and identity rules (ASP.NET Core .NET 8+)
-- [DEFRA SDS — C# coding standards](https://defra.github.io/software-development-standards/standards/csharp_coding_standards/)
-- [DEFRA SDS — Security standards](https://defra.github.io/software-development-standards/standards/security_standards/)
-- [DEFRA AI Toolkit — Security guidance](https://digital.defra.gov.uk/ai-toolkit/guidance/security)
-- [DEFRA AI Toolkit — Working with agents](https://digital.defra.gov.uk/ai-toolkit/guidance/working-with-agents)
-- [DEFRA AI Toolkit — Ethics](https://digital.defra.gov.uk/ai-toolkit/guidance/ethics)
-- [DEFRA AI Config Examples — Agents guide](https://github.com/DEFRA/defra-ai-config-examples/blob/main/pages/agents/index.md)
-- [DEFRA SDS — Credential exposure process](https://defra.github.io/software-development-standards/processes/credential_exposure/)
+- [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/)
+- [Defra SDS — C# coding standards](https://defra.github.io/software-development-standards/standards/csharp_coding_standards/)
+- [Defra SDS — Security standards](https://defra.github.io/software-development-standards/standards/security_standards/)
+- [Defra SDS — Git branching strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/)
+- [Defra SDS — Logging standards](https://defra.github.io/software-development-standards/standards/logging/)
+- [Defra SDS — Credential exposure process](https://defra.github.io/software-development-standards/processes/credential_exposure/)
+- [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai)
+- [Defra AI Toolkit — Security guidance](https://digital.defra.gov.uk/ai-toolkit/guidance/security)
+- [Defra AI Toolkit — Working with agents](https://digital.defra.gov.uk/ai-toolkit/guidance/working-with-agents)
+- [Defra AI Toolkit — Ethics](https://digital.defra.gov.uk/ai-toolkit/guidance/ethics)
+- [Defra AI Config Examples — Agents guide](https://github.com/DEFRA/defra-ai-config-examples/blob/main/pages/agents/index.md)

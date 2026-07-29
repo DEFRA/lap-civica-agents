@@ -1,3 +1,17 @@
+---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
+name: graph-api-sendmail
+description: >-
+  Provides a single callable skill to send email via Microsoft Graph API using OAuth 2.0 client credentials.
+  Use when an agent needs to send notifications, alerts, or reports via Microsoft 365 from a service account.
+license: OGL-UK-3.0
+metadata:
+  author: defra-digital
+  version: "1.0"
+---
+
+> **Last reviewed: 2026-07-29** — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
+
 # Graph API Send Mail Skill
 
 Purpose: provide a single callable skill to send email via Microsoft Graph API.
@@ -47,3 +61,9 @@ CLI
 ---
 
 The skill ships with a small CLI wrapper implemented in `graph_api_send_mail.py` for manual testing. Use the requirements file to install dependencies.
+
+---
+
+## Standards
+
+This skill is loaded by agents that send email via Microsoft Graph API. All outputs are subject to human review and AI transparency disclosure before use, per the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Credentials (`client_secret`, `tenant_id`, `client_id`) must never be committed — use placeholders only. Follows [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/), [Defra SDS — Security Standards](https://defra.github.io/software-development-standards/standards/security_standards/), and [Defra SDS — Credential Exposure Process](https://defra.github.io/software-development-standards/processes/credential_exposure/).

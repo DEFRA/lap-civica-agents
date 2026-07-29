@@ -261,11 +261,11 @@ real behavioural difference, not a selector problem.
  
 ## Change Log
  
-### v1.1 — 2026-07-20 — DEFRA Standards Compliance Update
- 
-All changes were reviewed against the [DEFRA AI Config Examples](https://github.com/defra/defra-ai-config-examples),
-[DEFRA Software Development Standards](https://defra.github.io/software-development-standards/),
-and the [DEFRA AI Toolkit](https://digital.defra.gov.uk/ai-toolkit). No pipeline
+### v1.1 — 2026-07-20 — Defra Standards Compliance Update
+
+All changes were reviewed against the [Defra AI Config Examples](https://github.com/DEFRA/defra-ai-config-examples),
+[Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/),
+and the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). No pipeline
 behaviour, generated output, or artefact schemas were altered beyond what is
 documented below.
  

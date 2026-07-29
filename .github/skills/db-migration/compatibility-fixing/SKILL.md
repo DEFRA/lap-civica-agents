@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: compatibility-fixing
 description: >
   Identify and fix compatibility issues when migrating SQL Server 2022 on-premises
@@ -87,6 +88,12 @@ Produce a report with four sections:
 | --- | --- | --- | --- |
 
 ### Informational
+
+---
+
+## Standards
+
+This skill is loaded by the [db-migration agent](./../../../agents/db-migration.agent.md). All outputs are subject to human review and AI transparency disclosure before use, per the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Follows [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/).
 
 | # | Feature | Platform Behaviour | Action |
 | --- | --- | --- | --- |
