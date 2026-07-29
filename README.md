@@ -10,20 +10,22 @@ Compatible with: GitHub Copilot, Claude Code, Codex CLI, Gemini CLI, Cursor, Win
 
 ## Total Agent Count by Domain
 
-| Domain | Count | Agents |
+> Sub-agents invoked internally by orchestrators are not counted here. Total reflects user-invocable top-level agents only.
+
+| Domain | Count | Top-Level Agents |
 |---|---|---|
 | Database & Data Integration | 2 | Database Migration, SSIS to ADF Migration |
 | DevOps & CI/CD | 1 | DevOps Pipeline Modernizer |
 | Documentation | 1 | Documentation LLD |
 | .NET Application Modernisation | 4 | .NET Framework Upgrade, Code Refactor, Service Modernisation (WCF/ASMX→REST), Windows Service to Lambda |
-| Identity & Authentication | 3 | Identity Migration Orchestrator, SAML Sub-Agent, OIDC Sub-Agent |
-| PDF & Reporting | 6 | PDF Report Modernizer, PDF Migration Orchestrator, PDF Discovery, PDF Infrastructure, PDF Report Converter, PDF Validation |
-| Testing & Quality | 9 | .NET Test Automation, Playwright Tester, E2E Baseline Orchestrator, E2E Page Discovery, E2E Selector Extractor, E2E Scenario Synthesiser, E2E Test Generator, E2E Runner, E2E Validator |
+| Identity & Authentication | 1 | Identity Migration Orchestrator *(routes internally to SAML and OIDC sub-agents)* |
+| PDF & Reporting | 2 | PDF Migration Orchestrator *(routes internally to Discovery, Infrastructure, Converter, Validation sub-agents)*, PDF Report Modernizer |
+| Testing & Quality | 3 | .NET Test Automation, Playwright Tester, E2E Baseline Orchestrator *(routes internally to 6 sub-agents)* |
 | Security | 1 | Security Code Analysis |
 | Project Management | 1 | Requirements to Scrum Board |
 | Utilities | 1 | GraphAPI Send Mail |
 | UI Compliance | 1 | GDS UI Compliance |
-| **Total** | **30** | |
+| **Total** | **18** | |
 
 ## Available Agents
 
