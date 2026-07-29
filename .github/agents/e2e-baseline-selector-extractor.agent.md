@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: e2e-baseline-selector-extractor
 description: "Classifies every UI element on one page into a typed Playwright selector descriptor."
 tools: [read, search, edit, todos]
@@ -148,8 +149,23 @@ been classified.
   only in Step 4 to locate status message strings, not for structural analysis.
 - One page per invocation. Do not process multiple pages.
  
-## References
- 
-- `.github/skills/e2e-baseline/references/selector-extraction-rules.md` — full classification rules, selector type definitions, and registry schema
-- [DEFRA AI Toolkit — Working with agents](https://digital.defra.gov.uk/ai-toolkit/guidance/working-with-agents)
+---
+
+## Compliance & Governance
+
+Classified as **MEDIUM RISK** under the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Requires:
+
+- **Human review** before the selector registry is used downstream.
+- **Literal values only** — never infer or invent label text; only record values literally present in source markup.
+- **Read-only operation** — only the selector registry JSON may be written.
+- **Feature branch** — all outputs committed on a named branch; reviewed via PR before merging to `main`, per the [Defra SDS Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+
+### [Defra SDS Alignment](https://defra.github.io/software-development-standards/guides/github_copilot/)
+
+Follows the [Defra SDS GitHub Copilot Guide](https://defra.github.io/software-development-standards/guides/github_copilot/), [Quality Assurance Standards](https://defra.github.io/software-development-standards/standards/quality_assurance_standards/), and [Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+
+## References — full classification rules, selector type definitions, and registry schema
+- [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/)
+- [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai)
+- [Defra AI Toolkit — Working with agents](https://digital.defra.gov.uk/ai-toolkit/guidance/working-with-agents)
 - [Playwright locator documentation](https://playwright.dev/docs/locators)

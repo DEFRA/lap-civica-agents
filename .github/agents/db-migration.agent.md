@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: Database Migration Agent - SQL Server
 description: Assess, fix compatibility, optimise, and validate on-premises SQL Server 2022 migrations to Azure SQL Database or Amazon RDS SQL Server. Full lifecycle or single-phase. Does not support other database engines.
 tools: ['terminal', 'read', 'edit', 'search']
@@ -147,3 +148,29 @@ If any phase fails during Auto mode:
 - "Validate that my migration was successful"
 - "Generate a migration report for stakeholders"
 - "Run the full migration workflow to Azure SQL Database"
+
+---
+
+## Compliance & Governance
+
+Classified as **MEDIUM RISK** under the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Requires:
+
+- **Human review** before any AI-generated output is used, merged, or deployed.
+- **AI transparency** — PR descriptions must disclose AI assistance and name the reviewer.
+- **Feature branch** — all changes on a named branch; reviewed via PR before merging to `main`, per the [Defra SDS Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+- **No hardcoded secrets** — credentials sourced from Key Vault or environment variables only.
+- **SonarQube** — all AI-generated code must pass static analysis before merge.
+
+### [Defra SDS Alignment](https://defra.github.io/software-development-standards/guides/github_copilot/)
+
+Follows the [Defra SDS GitHub Copilot Guide](https://defra.github.io/software-development-standards/guides/github_copilot/), [C# Coding Standards](https://defra.github.io/software-development-standards/standards/csharp_coding_standards/), [Security Standards](https://defra.github.io/software-development-standards/standards/security_standards/), and [Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+
+## References
+
+- [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/)
+- [Defra SDS — C# coding standards](https://defra.github.io/software-development-standards/standards/csharp_coding_standards/)
+- [Defra SDS — Security standards](https://defra.github.io/software-development-standards/standards/security_standards/)
+- [Defra SDS — Git branching strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/)
+- [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai)
+- [Defra AI Toolkit — Security guidance](https://digital.defra.gov.uk/ai-toolkit/guidance/security)
+- [Defra AI Config Examples — Agents guide](https://github.com/DEFRA/defra-ai-config-examples/blob/main/pages/agents/index.md)

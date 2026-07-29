@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: security-code
 version: 2.1.0
 description: >
@@ -20,7 +21,7 @@ governed_by: Defra AI Toolkit v1.0
 defra_ai_toolkit_url: https://digital.defra.gov.uk/ai-toolkit
 audit_log: true
 created: 2025-01-01
-updated: 2026-07-27
+updated: 2026-07-29
 agent_id: security-code-2.1.0
 ---
 
@@ -37,6 +38,27 @@ agent_id: security-code-2.1.0
 This agent scans a codebase and generates a security findings report aligned with the **ITHC (IT Health Check)** spreadsheet format used in UK Government engagements. It combines **SAST** (Static Analysis), **SCA** (Software Composition Analysis), **Secrets Scanning**, **IaC Review**, and **AI-assisted pattern detection** to identify the full breadth of vulnerabilities across a project.
 
 **Defra Commitment:** This agent is designed to operate safely and responsibly per Defra AI Toolkit standards. See [Responsible Use](#responsible-use-defra-ai-toolkit-alignment) and [AI Limitations & Ethics](#ai-limitations--ethics-transparency).
+
+---
+
+## Compliance & Governance
+
+Classified as **HIGH RISK** under the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). This agent performs security scanning and generates ITHC findings reports — output is used to make remediation decisions. Requires:
+
+- **Human review** before any findings report is shared, acted upon, or used to gate a deployment.
+- **Second reviewer** — mandatory for security-critical findings that result in code changes.
+- **AI transparency** — every report must include the agent version, scan date, and AI confidence ratings; recipients must be informed the report is AI-assisted.
+- **No bypass of quality gates** — SonarQube, secret scanning, and ITHC sign-off must all complete before the findings are closed.
+- **Feature branch** — all generated reports committed on a named branch; reviewed via PR before merging to `main`, per the [Defra SDS Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+- **No sensitive data leakage** — `pii_redaction: true` must remain enabled; never disable redaction for convenience.
+
+### [Defra SDS Alignment](https://defra.github.io/software-development-standards/guides/github_copilot/)
+
+Follows the [Defra SDS GitHub Copilot Guide](https://defra.github.io/software-development-standards/guides/github_copilot/), [Security Standards](https://defra.github.io/software-development-standards/standards/security_standards/), [Common Coding Standards](https://defra.github.io/software-development-standards/standards/common_coding_standards/), and [Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+
+> Full responsible use details, ethics, and observability requirements: see [Responsible Use](#responsible-use-defra-ai-toolkit-alignment) below.
+
+---
 
 ```
 Name:        ITHC Security Findings Scanner Agent
@@ -154,6 +176,8 @@ This agent depends on the following skill and reference files. All files **must*
 ---
 
 ## Responsible Use (Defra AI Toolkit Alignment)
+
+> See also: [**Compliance & Governance**](#compliance--governance) — risk classification, Defra SDS alignment, and feature branch requirements.
 
 ### ✅ Security: Protecting Code, Secrets & Environment
 
@@ -425,7 +449,9 @@ START
 
 ### 🌐 External Standards
 
+- [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/)
 - [Defra AI Toolkit](https://digital.defra.gov.uk/ai-toolkit) — Framework & standards
+- [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai)
 - [Defra: Using Data with AI](https://digital.defra.gov.uk/ai-toolkit/guidance/using-data-with-ai) — Data governance
 - [OWASP Top 10 2021](https://owasp.org/Top10/) — Web application security
 - [CWE Top 25](https://cwe.mitre.org/top25/) — Most dangerous software weaknesses

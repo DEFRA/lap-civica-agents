@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: auth-testing-validation-dotnet
 description: >-
   Provides a repeatable testing and validation checklist for Entra ID authentication migrations.
@@ -7,12 +8,12 @@ license: OGL-UK-3.0
 metadata:
   author: defra-digital
   version: "1.0"
-compatibility: ".NET Framework 4.8 and ASP.NET Core .NET 8+"
+compatibility: "ASP.NET Core .NET 10"
 ---
 
-> **Framework scope:** This skill supports two runtime targets. For **.NET Framework 4.8** applications, follow the procedure below as written. For **ASP.NET Core (.NET 8+)** applications, test stubs should use xUnit with `Microsoft.AspNetCore.Mvc.Testing` and Playwright for journey tests, rather than .NET Framework test patterns.
+> **Framework scope:** This skill targets **.NET 10 (ASP.NET Core)**. Test stubs should use xUnit with `Microsoft.AspNetCore.Mvc.Testing` and Playwright for journey tests.
 
-# Auth Testing & Validation (.NET Framework 4.0)
+# Auth Testing & Validation (.NET 10)
 
 ## When to use this skill
 Use when:
@@ -69,3 +70,9 @@ Create a lightweight `AUTH_VALIDATION.md` containing:
 ### AUTH_VALIDATION.md draft
 ### Test scenarios checklist (pass/fail placeholders)
 ### Any new/updated test files (if created)
+
+---
+
+## Standards
+
+This skill is loaded by identity migration agents. All auth test code is **HIGH RISK** — second reviewer mandatory. All outputs are subject to human review and AI transparency disclosure before use, per the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Follows [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/) and [Defra SDS — Security Standards](https://defra.github.io/software-development-standards/standards/security_standards/).

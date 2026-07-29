@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: e2e-baseline
 description: >
   Use when you need to generate a Playwright E2E behavioural baseline test suite
@@ -264,3 +265,9 @@ When the migrated application is ready:
  
 The `Specs/{PageName}Tests.cs` files are never modified post-migration
 unless a business requirement genuinely changed.
+
+---
+
+## Standards
+
+This skill is loaded by the [e2e-baseline-orchestrator agent](./../../agents/e2e-baseline-orchestrator.agent.md). All outputs are subject to human review and AI transparency disclosure before use, per the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Follows [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/) and [Defra SDS — Quality assurance and test standards](https://defra.github.io/software-development-standards/standards/quality_assurance_standards/).

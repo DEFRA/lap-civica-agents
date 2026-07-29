@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: e2e-baseline-page-discovery
 description: "Scans all .aspx pages in a Web Forms project and writes page-inventory.json. Read-only."
 tools: [read, search, todos]
@@ -139,8 +140,22 @@ still set status to `"complete"` so the pipeline can continue.
   `e2e-baseline-scenario-synthesiser`.
 - Do not write any file other than `docs/e2e-baseline/page-inventory.json`.
  
-## References
- 
-- `.github/skills/e2e-baseline/references/discovery-procedure.md` — detailed scanning procedure and field extraction rules
-- [Defra quality assurance standards](https://defra.github.io/software-development-standards/standards/quality_assurance_standards/)
-- [DEFRA AI Toolkit — Working with agents](https://digital.defra.gov.uk/ai-toolkit/guidance/working-with-agents)
+---
+
+## Compliance & Governance
+
+Classified as **MEDIUM RISK** under the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Requires:
+
+- **Human review** before the page inventory is accepted as authoritative.
+- **Read-only operation** — this agent must not modify any source file; only `page-inventory.json` may be written.
+- **Feature branch** — all outputs committed on a named branch; reviewed via PR before merging to `main`, per the [Defra SDS Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+- **AI transparency** — every finding must cite its source file and attribute; no inference without evidence.
+
+### [Defra SDS Alignment](https://defra.github.io/software-development-standards/guides/github_copilot/)
+
+Follows the [Defra SDS GitHub Copilot Guide](https://defra.github.io/software-development-standards/guides/github_copilot/), [Quality Assurance Standards](https://defra.github.io/software-development-standards/standards/quality_assurance_standards/), and [Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+
+## References(https://defra.github.io/software-development-standards/guides/github_copilot/)
+- [Defra SDS — Quality assurance standards](https://defra.github.io/software-development-standards/standards/quality_assurance_standards/)
+- [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai)
+- [Defra AI Toolkit — Working with agents](https://digital.defra.gov.uk/ai-toolkit/guidance/working-with-agents)

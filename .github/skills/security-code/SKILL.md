@@ -3,7 +3,7 @@
 > **Auto-loaded by:** `.github/agents/security-code.agent.md`
 > **Defra AI Toolkit:** ✅ Compliant
 > **Data Classification:** Official
-> **Last Updated:** 2026-07-24
+> **Last Updated:** 2026-07-29
 
 ---
 
@@ -371,3 +371,9 @@ The following rules are enforced on every run and **cannot** be overridden by us
 | **Sustainability** | Use the appropriate scan mode; avoid full AI inference when SAST is sufficient |
 | **Transparency** | All findings tagged by source; AI findings clearly marked for human review |
 | **Incident Reporting** | `AICapabilityAndEnablement@defra.gov.uk` \| `https://github.com/DEFRA/lap-civica-agents/issues` |
+
+---
+
+## Standards
+
+This skill is loaded by the [security-code agent](./../../agents/security-code.agent.md). This skill is classified as **HIGH RISK** — all findings must be human-reviewed before remediation is applied. All outputs are subject to AI transparency disclosure, per the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Follows [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/) and [Defra SDS — Security Standards](https://defra.github.io/software-development-standards/standards/security_standards/).

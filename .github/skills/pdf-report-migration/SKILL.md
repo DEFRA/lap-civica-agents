@@ -1,5 +1,11 @@
-
+---
+name: pdf-report-migration
+description: Modernises legacy report files (Crystal Reports, TallPDF, etc.) to Azure-safe PDF output for .NET ASP.NET applications. Extracts report metadata, generates HTML templates, and produces renderers. Supports pre-migration and post-migration split workflow.
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
+---
 # PDF Report Modernizer – Skills Specification
+ 
+> **Last reviewed: 2026-07-29** — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
  
 This document defines the core skills required by the agent.
  
@@ -40,3 +46,9 @@ HtmlToPdfConversionSkill
 > - Stage 2 skip: `{reportOutputFolder}/templates/{ReportName}.html` exists → reuse.
 > - Stage 3 skip (`modern`): `{srcFolder}/Reports/{ReportName}Renderer.cs` exists → skip.
 > - Stage 3 **no skip** (`modern`): only a `.vb` renderer exists → regenerate Stage 3 as C# renderer.
+
+---
+
+## Standards
+
+This skill is loaded by the pdf-report-migration agents. All outputs are subject to human review and AI transparency disclosure before use, per the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Follows [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/).

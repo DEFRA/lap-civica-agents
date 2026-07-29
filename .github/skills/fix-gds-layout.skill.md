@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: "fix-gds-layout"
 description: "Reusable GDS layout skill — audit and fix GOV.UK Design System assets, header, footer, and body structure for any web framework. Auto-detects the shared layout file (ASP.NET Core MVC, Razor Pages, or any custom path). Invoke as part of a full GDS compliance pass or standalone for a specific layout issue. Use when: layout is not styled; header looks wrong; footer missing or unstyled; GOV.UK crown logo not showing; service name or navigation in wrong place; fonts not loading; govuk-frontend CSS or JS assets missing; page template does not match GDS structure."
 tools: [read, edit, search, fetch]
@@ -246,3 +247,9 @@ Use the `search` tool to confirm the project file exists (`**/*.csproj`), then a
 | Nav links not visible on mobile | Missing `govuk-js-service-navigation-toggle` button | Add toggle button with `hidden` attribute |
 | Components not interactive | No JS or `initAll()` not called | Add module script + `initAll()` |
 | "Error: " not in page title | `ViewData["HasErrors"]` not set | Set `ViewData["HasErrors"] = true` in pages with errors |
+
+---
+
+## Standards
+
+This skill is loaded by the [gds-ui agent](./../../agents/gds-ui.agent.md). All layout rewrites require a human approval checkpoint (Step 2a) before any files are written. All outputs are subject to AI transparency disclosure before use, per the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Follows [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/) and [Defra SDS — Common coding standards](https://defra.github.io/software-development-standards/standards/common_coding_standards/).

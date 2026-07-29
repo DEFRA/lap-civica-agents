@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: token-lifecycle-dotnet
 description: >-
   Implements token validation, expiry handling, session lifecycle rules, and renew/re-auth triggers for Entra ID authentication.
@@ -7,12 +8,12 @@ license: OGL-UK-3.0
 metadata:
   author: defra-digital
   version: "1.0"
-compatibility: ".NET Framework 4.8 and ASP.NET Core .NET 8+"
+compatibility: "ASP.NET Core .NET 10"
 ---
 
-> **Framework scope:** This skill supports two runtime targets. For **.NET Framework 4.8** applications, follow the procedure below as written. For **ASP.NET Core (.NET 8+)** applications, token validation and session lifecycle are managed by ASP.NET Core authentication middleware — wire via `AddAuthentication()` in `Program.cs` and use `ITokenAcquisition` (OIDC) or SAML session expiry re-challenge patterns. All security guardrails apply equally to both targets.
+> **Framework scope:** This skill targets **.NET 10 (ASP.NET Core)**. Token validation and session lifecycle are managed by ASP.NET Core authentication middleware — wire via `AddAuthentication()` in `Program.cs` and use `ITokenAcquisition` (OIDC) or SAML session expiry re-challenge patterns.
 
-# Token Lifecycle & Session Management (.NET Framework 4.0)
+# Token Lifecycle & Session Management (.NET 10)
 
 ## When to use this skill
 Use when implementing or refactoring:
@@ -56,3 +57,9 @@ Use when implementing or refactoring:
 - Expired token triggers re-auth
 - Invalid token denied safely
 - Logout clears session cleanly
+
+---
+
+## Standards
+
+This skill is loaded by identity migration agents. Token lifecycle code is **HIGH RISK** — second reviewer mandatory. All outputs are subject to human review and AI transparency disclosure before use, per the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Follows [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/) and [Defra SDS — Security Standards](https://defra.github.io/software-development-standards/standards/security_standards/).

@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 description: 'LLD Agent generation instructions used to generate civica specific LLD documents from respective HLSA and HLD source files. This file is used by the documentation-lld agent to fill a LLD .docx template with content from the source files.'
 applyTo: '**'
 ---
@@ -113,3 +114,16 @@ When the insert function finds the target heading and takes the next paragraph, 
 ## 13. Document Generation Summary — Companion Markdown File Only, Not in DOCX
 
 The Document Generation Summary (auto-filled sections, manual review flags, needs-input list, assumptions, confidence ratings) must be written only to the companion `docs/LLD-BSE-Summary.md` file. Do not append a Document Generation Summary section to the DOCX. The DOCX must end at the last substantive content section that was present in the template — no summary appendix is added to the Word document.
+
+---
+
+## References
+
+- [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/)
+- [Defra SDS — Common coding standards](https://defra.github.io/software-development-standards/standards/common_coding_standards/)
+- [Defra SDS — Git branching strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/)
+- [Defra SDS — Security standards](https://defra.github.io/software-development-standards/standards/security_standards/)
+- [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai)
+- [Defra AI Toolkit — Security guidance](https://digital.defra.gov.uk/ai-toolkit/guidance/security)
+- [Defra AI Toolkit — Keeping data safe](https://digital.defra.gov.uk/ai-toolkit/guidance/keeping-data-safe)
+- [Defra AI Config Examples — Agents guide](https://github.com/DEFRA/defra-ai-config-examples/blob/main/pages/agents/index.md)

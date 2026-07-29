@@ -7,7 +7,7 @@ This file is the shared “brain” that keeps changes consistent, secure, and r
 
 ## Repo Context (Assumed)
 - Legacy application is primarily **VB.NET** on **ASP.NET (full .NET Framework 4.8)**.
-- Changes should remain compatible with **.NET Framework 4.8** (do not upgrade to .NET 6/7/8 unless explicitly requested).
+- Changes should remain compatible with **.NET Framework 4.8** (do not upgrade to .NET10 unless explicitly requested).
 - Authentication is being migrated from **Windows Authentication** to **Azure Entra ID-based authentication**.
 
 ---
@@ -72,6 +72,17 @@ Any authentication / claims changes must include:
 
 4) **Local testing approach**
 - Where feasible, use a **mock SAML identity provider** for local validation of claims mapping, then document how to switch to real Entra ID settings. [2](URL of configuration Placeholder)
+
+---
+
+## References
+
+- [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/)
+- [Defra SDS — Security standards](https://defra.github.io/software-development-standards/standards/security_standards/)
+- [Defra SDS — Credential exposure process](https://defra.github.io/software-development-standards/processes/credential_exposure/)
+- [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai)
+- [Defra AI Toolkit — Security guidance](https://digital.defra.gov.uk/ai-toolkit/guidance/security)
+- [Defra AI Config Examples — Agents guide](https://github.com/DEFRA/defra-ai-config-examples/blob/main/pages/agents/index.md)
 
 ---
 

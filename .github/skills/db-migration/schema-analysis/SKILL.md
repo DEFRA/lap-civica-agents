@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: schema-analysis
 description: 'Introspect and analyse a SQL Server 2022 source database for migration to Azure SQL Database or Amazon RDS SQL Server. Extracts all objects, identifies unsupported features on the target platform, assesses compatibility risks, and produces a migration readiness report.'
 ---
@@ -97,6 +98,12 @@ Flag every object or feature that is unsupported or restricted on the target pla
 | Dedicated Admin Connection (DAC) | **Low** | Not available on RDS |
 
 ### 5. Identify Additional Migration Risks
+
+---
+
+## Standards
+
+This skill is loaded by the [db-migration agent](./../../../agents/db-migration.agent.md). All outputs are subject to human review and AI transparency disclosure before use, per the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Follows [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/).
 
 Also flag:
 - Temporal tables (system-versioned) — verify syntax compatibility on target

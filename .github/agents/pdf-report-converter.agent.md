@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: pdf-report-converter
 description: Converts one programmatic PDF report class to a Razor view + C# view model. One report per invocation.
 tools: [read, edit, search]
@@ -252,12 +253,25 @@ Return to the orchestrator with:
 - Do not use `@Html.Raw` without a `<!-- TRUSTED-HTML: sourced from [...] -->` annotation.
 - Do not hardcode secrets, connection strings, or credentials in any generated file.
  
-## References
- 
+---
+
+## Compliance & Governance
+
+Classified as **MEDIUM RISK** under the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Requires:
+
+- **Human review** before each converted Razor view and view model is merged.
+- **OWASP A03** — every `@Html.Raw(...)` usage must have a `<!-- TRUSTED-HTML: sourced from [...] -->` annotation; no unreviewed raw HTML output.
+- **No hardcoded secrets** — no connection strings or credentials in any generated file.
+- **Feature branch** — all generated files committed on a named branch; reviewed via PR before merging to `main`, per the [Defra SDS Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+- **SonarQube** — all AI-generated code must pass static analysis before merge.
+
+### [Defra SDS Alignment](https://defra.github.io/software-development-standards/guides/github_copilot/)
+
+Follows the [Defra SDS GitHub Copilot Guide](https://defra.github.io/software-development-standards/guides/github_copilot/), [C# Coding Standards](https://defra.github.io/software-development-standards/standards/csharp_coding_standards/), [Security Standards](https://defra.github.io/software-development-standards/standards/security_standards/), [Quality Assurance Standards](https://defra.github.io/software-development-standards/standards/quality_assurance_standards/), and [Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+
+## References(https://defra.github.io/software-development-standards/standards/security_standards/)
+- [Defra SDS — C# coding standards](https://defra.github.io/software-development-standards/standards/csharp_coding_standards/) — Microsoft C# conventions, nullable reference types, SOLID principles
+- [Defra SDS — Quality assurance and test standards](https://defra.github.io/software-development-standards/standards/quality_assurance_standards/)
+- [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai)
 - [Defra AI Toolkit — Security](https://digital.defra.gov.uk/ai-toolkit/guidance/security) — OWASP Top 10 review; no hardcoded secrets; human review of AI-generated code
-- [Defra software development standards — Security standards (OWASP)](https://defra.github.io/software-development-standards/standards/security_standards/)
-- [Defra software development standards — C# coding standards](https://defra.github.io/software-development-standards/standards/csharp_coding_standards/) — Microsoft C# conventions, nullable reference types, SOLID principles
-- [Defra software development standards — Quality assurance and test standards](https://defra.github.io/software-development-standards/standards/quality_assurance_standards/)
-- [Defra AI config examples — Agents guide](https://github.com/DEFRA/defra-ai-config-examples/blob/main/pages/agents/index.md)
-- If a `DirectCast` / unsafe cast is found in the original class, always replace
-  it with a safe C# pattern match — never replicate the unsafe cast.
+- [Defra AI Config Examples — Agents guide](https://github.com/DEFRA/defra-ai-config-examples/blob/main/pages/agents/index.md)

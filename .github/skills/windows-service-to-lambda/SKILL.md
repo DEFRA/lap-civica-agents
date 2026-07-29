@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 skill:
   id: windows-service-to-lambda
   name: Windows Service to AWS Lambda Migration
@@ -188,3 +189,9 @@ migration-output/
 │   └── <ServiceName>.md
 └── migration-report-<YYYY-MM-DD>.html
 ```
+
+---
+
+## Standards
+
+This skill is loaded by the [windows-service-to-lambda agent](./../../agents/windows-service-to-lambda.agent.md). All outputs are subject to human review and AI transparency disclosure before use, per the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Follows [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/).

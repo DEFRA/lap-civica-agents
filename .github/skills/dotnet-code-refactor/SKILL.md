@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 skill:
   id: dotnet-code-refactor
   name: .NET Code Refactor
@@ -99,3 +100,8 @@ Run the sub-skills in the following sequence — each depends on outputs from th
 - **Never** modify the HTML structure of `.cshtml` view stubs — only populate `PageModel` (`.cshtml.cs`) `OnGet`/`OnPost` handlers.
 - **Never** write secret values (connection strings, keys, passwords) to any file.
  
+---
+
+## Standards
+
+This skill is loaded by the [dotnet-code-refactor agent](./../../agents/dotnet-code-refactor.agent.md). All outputs are subject to human review and AI transparency disclosure before use, per the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Follows [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/) and [Defra SDS — C# coding standards](https://defra.github.io/software-development-standards/standards/csharp_coding_standards/).

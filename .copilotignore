@@ -22,6 +22,10 @@ appsettings.Staging.*.json
 appsettings.Live.json
 appsettings.UAT.json
 
+# Entra ID app registration checklists (may contain tenant/client IDs, redirect URIs)
+ENTRA-REGISTRATION.md
+**/ENTRA-REGISTRATION.md
+
 # Config transforms (may contain production connection strings or SMTP credentials)
 Web.Release.config
 Web.Staging.config

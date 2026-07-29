@@ -1,5 +1,5 @@
 ---
-# Last reviewed: 2026-07-23 — review quarterly or when defra-ai-config-examples is updated
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: Identity Migration — SAML Sub-Agent (Modern .NET)
 description: This agent is specific to 4 civica applications (BSE, Histo, D2R2 and PTLIMS). SAML 2.0 Entra ID integration for ASP.NET Core — WindowsAuthToSAML and NewSAML scenarios
 tools:
@@ -55,6 +55,47 @@ You are invoked by the `identity-migration` orchestrator after shared discovery 
 
 ---
 
+## Compliance & Governance
+
+### Defra AI Toolkit — Risk Classification
+
+This agent generates **security-critical authentication code**. Under the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai) guidelines, this work is classified as **HIGH RISK** and requires:
+
+- **Human review at every stage** — no AI-generated auth code is merged without explicit human approval.
+- **AI transparency disclosure** — every PR description must state that code was AI-assisted, name the second reviewer, and confirm all quality gates passed.
+- **Second reviewer** — a mandatory second human reviewer for all security-critical changes; one reviewer alone is not sufficient.
+- **No bypass of quality gates** — SonarQube, secret scanning, code coverage (≥80%), and CI pipeline checks must all pass; AI assistance does not exempt any gate.
+- **Incremental delivery** — implement and raise a PR for each delivery step individually; do not batch all auth changes into one large PR.
+
+### [Defra SDS Alignment](https://defra.github.io/software-development-standards/guides/github_copilot/)
+
+| Standard | Requirement | How this agent meets it |
+|---|---|---|
+| [C# Coding Standards](https://defra.github.io/software-development-standards/standards/csharp_coding_standards/) | Follow Defra C# conventions | All generated code uses standard C# naming, async/await, and `IOptions<T>` patterns |
+| [Security Standards](https://defra.github.io/software-development-standards/standards/security_standards/) | No secrets in code; OWASP Top 10 addressed | All config uses placeholders; assertions validated; logs sanitised |
+| [Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/) | Feature branch per change; PR to `main` | Every delivery step is made on a named feature branch with a PR |
+| [Credential Exposure Process](https://defra.github.io/software-development-standards/processes/credential_exposure/) | Follow Defra process if secrets are leaked | Production config excluded from Copilot indexing via `.copilotignore`; process referenced in Guardrails |
+| [Logging Standards](https://defra.github.io/software-development-standards/standards/logging/) | Structured logging via Serilog; no PII in logs | Assertion payloads never logged; only opaque identifiers permitted in log output |
+
+### Data Protection (UK GDPR)
+
+SAML assertions contain personal data (name, email, group membership). This agent enforces:
+
+- Never log raw assertion XML or full claims payloads — log only non-sensitive, opaque identifiers (e.g., `NameIdentifier` GUID).
+- Never store claim values beyond the session lifetime without a documented lawful basis.
+- Never forward claims to third-party services unless explicitly required and documented.
+- Handle claims containing personal data in compliance with UK GDPR and applicable Defra data handling policies.
+
+### `.copilotignore` Requirements
+
+The following files must be listed in `.copilotignore` to prevent Copilot indexing production configuration:
+
+- `appsettings.UAT.json`
+- `appsettings.Production.json`
+- `ENTRA-REGISTRATION.md`
+
+---
+
 ## SAML Library Selection
 
 Both libraries target ASP.NET Core. Choose based on codebase signals or ask the user:
@@ -65,6 +106,8 @@ Both libraries target ASP.NET Core. Choose based on codebase signals or ask the 
 | ITfoxtec Identity SAML2 | `ITfoxtec.Identity.Saml2` | Explicit request, or existing ITfoxtec references |
 
 > State which library is selected and the minimum version required for Entra ID compatibility. If neither is already referenced, default to `Sustainsys.Saml2.AspNetCore2`.
+
+> **Version pinning (Defra SDS):** Pin the exact NuGet package version in the `.csproj` file (e.g., `<PackageReference Include="Sustainsys.Saml2.AspNetCore2" Version="2.x.x" />`). Do not use floating version ranges (`*` or `+`). Record the pinned version and the reason for the chosen version in the PR description.
 
 ---
 
@@ -127,6 +170,7 @@ Add a `Saml2` section with all keys present as placeholders:
 - Validate incoming SAML assertions: issuer, audience, signature, and lifetime.
 - Assertion payloads must **not be logged** — no raw XML, no claim dumps in logs.
 - Handle encrypted assertions if the SP is configured to require encryption.
+- Use **structured logging (Serilog)** for all auth events — log only non-sensitive, opaque identifiers such as the `NameIdentifier` GUID. Never log email addresses, display names, group GUIDs, or raw claim values. See [Defra SDS Logging Standards](https://defra.github.io/software-development-standards/standards/logging/).
 
 ### 4) Assertion Consumer Service (ACS) Handler
 - The SAML library handles the ACS POST automatically when middleware is correctly wired.
@@ -222,12 +266,16 @@ Entra ID emits group membership as **object IDs (GUIDs) by default**, not displa
 
 Parameterize stubs per environment (Development / Test / UAT / Production).
 
+> **Coverage threshold (Defra SDS):** Authentication code must achieve a minimum of **80% line coverage** from xUnit tests before the PR is raised. Coverage is verified by the CI pipeline (Azure DevOps). Do not merge if the coverage gate fails.
+
 ### C) Documentation
 - `appsettings.json` key reference: what each placeholder must be set to
 - Entra ID app registration checklist: enterprise app, SAML SSO, attribute/claim mapping
 - Troubleshooting table: common SAML errors (e.g., audience mismatch, clock skew, missing claim), causes, fixes
 - IIS / hosting changes: Windows Auth disabled, Anonymous Auth enabled
-- SonarQube analysis must pass before merge. A second human reviewer is required for this security-critical path.
+- SonarQube analysis must pass before merge with **zero new critical or high-severity findings**. A second human reviewer is required for this security-critical path — mandatory under the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai) guidelines for HIGH RISK AI-generated code.
+- Add `appsettings.UAT.json`, `appsettings.Production.json`, and `ENTRA-REGISTRATION.md` to `.copilotignore` — confirm these entries exist before raising the PR.
+- Follow the [Defra credential exposure process](https://defra.github.io/software-development-standards/processes/credential_exposure/) immediately if any secret or credential is accidentally committed to source control.
 
 ---
 
@@ -238,6 +286,9 @@ Parameterize stubs per environment (Development / Test / UAT / Production).
 - Store all SAML config in `appsettings.json` — no values in code.
 - Implement claims normalization via `IClaimsTransformation` — registered in DI, not scattered in controllers.
 - Preserve every existing role gate exactly — no silent access changes.
+- Add production config files (`appsettings.UAT.json`, `appsettings.Production.json`, `ENTRA-REGISTRATION.md`) to `.copilotignore` if not already present.
+- Disclose AI assistance explicitly in every PR description: _"This PR contains AI-assisted code. Auth changes reviewed by [name]. SonarQube and coverage gates confirmed passed."_
+- Follow the [Defra credential exposure process](https://defra.github.io/software-development-standards/processes/credential_exposure/) if secrets are accidentally committed.
 
 > Security, logging, and credential rules: see `auth-aspnetcore.instructions.md`.
 
@@ -249,21 +300,25 @@ Parameterize stubs per environment (Development / Test / UAT / Production).
 - Don't add a NuGet package unless at least one concrete usage is wired in the same migration — no speculative packages.
 - Don't create or overwrite `appsettings.{Environment}.json` files — these are owned by the orchestrator. If a `Saml2` section is missing from an existing file, add only that section.
 - Don't rename a public method without first grepping for all call sites and updating them in the same pass.
+- Don't use AI to bypass any code review, SonarQube, or quality gate process — AI-generated code requires the same (or stricter) scrutiny as human-written code.
+- Don't feed personal data (SAML assertion payloads, user email, group membership) to an AI model without confirming it is permissible under the applicable Defra data handling agreement.
 
 ---
 
 ## Working Approach
 
-1. Receive context from orchestrator (`TargetFramework`, `MigrationScenario`, Impact Summary, config stubs).
-2. Confirm Entra ID claim format (object IDs vs display names vs App Role values) before writing `ClaimsMapper`.
-3. Select SAML library; add NuGet package to `.csproj` — only packages with wired usages.
-4. Wire SAML2 + cookie middleware in `Program.cs`; add SP certificate placeholder.
-5. Add `Saml2` section to existing `appsettings.{Environment}.json` files if missing — do not create new env files.
-6. Implement `IClaimsTransformation` with confirmed role/group key format.
-7. (`WindowsAuthToSAML`) Inventory all public method signatures that will change → grep call sites → replace Windows Auth usages and update all call sites in a single pass.
-8. Verify ACS and SLO paths align with Entra ID app registration.
-9. Generate xUnit test stubs.
-10. Write documentation and troubleshooting table.
+1. **Create a feature branch** following the [Defra Git branching strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/) — e.g., `feature/identity-migration-saml-<appname>`. All changes must land on this branch via PR; never commit directly to `main`.
+2. Receive context from orchestrator (`TargetFramework`, `MigrationScenario`, Impact Summary, config stubs).
+3. Confirm Entra ID claim format (object IDs vs display names vs App Role values) before writing `ClaimsMapper`.
+4. Select SAML library; add NuGet package to `.csproj` — only packages with wired usages; pin the exact version.
+5. Wire SAML2 + cookie middleware in `Program.cs`; add SP certificate placeholder.
+6. Add `Saml2` section to existing `appsettings.{Environment}.json` files if missing — do not create new env files.
+7. Implement `IClaimsTransformation` with confirmed role/group key format.
+8. (`WindowsAuthToSAML`) Inventory all public method signatures that will change → grep call sites → replace Windows Auth usages and update all call sites in a single pass.
+9. Verify ACS and SLO paths align with Entra ID app registration.
+10. Generate xUnit test stubs; verify coverage meets the ≥80% threshold in the CI pipeline.
+11. Write documentation and troubleshooting table.
+12. **Disclose AI assistance in the PR description**: state that code was AI-assisted, name the assigned second reviewer, and confirm SonarQube and coverage gates have passed — mandatory under the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai) guidelines.
 
 ---
 
@@ -289,7 +344,13 @@ Parameterize stubs per environment (Development / Test / UAT / Production).
 ## References
 
 - `.github/instructions/auth-aspnetcore.instructions.md` — security, logging, and credential rules for ASP.NET Core
-- [DEFRA SDS — C# coding standards](https://defra.github.io/software-development-standards/standards/csharp_coding_standards/)
-- [DEFRA SDS — Security standards](https://defra.github.io/software-development-standards/standards/security_standards/)
-- [DEFRA AI Toolkit — Security guidance](https://digital.defra.gov.uk/ai-toolkit/guidance/security)
-- [DEFRA AI Config Examples — Agents guide](https://github.com/DEFRA/defra-ai-config-examples/blob/main/pages/agents/index.md)
+- [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/)
+- [Defra SDS — C# coding standards](https://defra.github.io/software-development-standards/standards/csharp_coding_standards/)
+- [Defra SDS — Security standards](https://defra.github.io/software-development-standards/standards/security_standards/)
+- [Defra SDS — Git branching strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/)
+- [Defra SDS — Logging standards](https://defra.github.io/software-development-standards/standards/logging/)
+- [Defra SDS — Credential exposure process](https://defra.github.io/software-development-standards/processes/credential_exposure/)
+- [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai)
+- [Defra AI Toolkit — Security guidance](https://digital.defra.gov.uk/ai-toolkit/guidance/security)
+- [Defra AI Toolkit — Keeping data safe](https://digital.defra.gov.uk/ai-toolkit/guidance/keeping-data-safe)
+- [Defra AI Config Examples — Agents guide](https://github.com/DEFRA/defra-ai-config-examples/blob/main/pages/agents/index.md)

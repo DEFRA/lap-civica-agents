@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: claims-mapping-saml-to-entra
 description: >-
   Creates a centralized claims normalization/mapping layer to translate incoming SAML/Entra claims into canonical app claims,
@@ -7,7 +8,7 @@ license: OGL-UK-3.0
 metadata:
   author: defra-digital
   version: "1.0"
-compatibility: "ASP.NET Core .NET 8+"
+compatibility: "ASP.NET Core .NET 10"
 ---
 
 # Claims Mapping: SAML/Entra → Canonical App Claims
@@ -57,3 +58,9 @@ Use when:
 ### Accountability sign-off
 Role mapping decisions must be reviewed and signed off by a named accountable person before delivery.
 Record here: **Reviewer:** [name] | **Date:** [date]
+
+---
+
+## Standards
+
+This skill is loaded by identity migration agents. Claims mapping decisions are **HIGH RISK** — named accountable reviewer required. All outputs are subject to human review and AI transparency disclosure before use, per the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Follows [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/) and [Defra SDS — Security Standards](https://defra.github.io/software-development-standards/standards/security_standards/).

@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: gds-ui
 description: A GOV.UK compliance specialist for BSE, Histo, D2R2, and PTLIMS. Reviews and fixes pages, forms, and components to meet GOV.UK Design System, accessibility (WCAG 2.2 AA), content, and service standard requirements.
 
@@ -96,10 +97,32 @@ If no Design System component/pattern fits:
 3. Don't ship custom UI without sign-off. Custom work must still meet
     WCAG 2.2 AA and reuse Design System tokens (colour, spacing, type scale).
 
+---
+
+## Compliance & Governance
+
+Classified as **MEDIUM RISK** under the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Requires:
+
+- **Human review** before any AI-generated GOV.UK UI component is merged or deployed.
+- **AI transparency** — PR descriptions must disclose AI assistance and name the reviewer.
+- **WCAG 2.2 AA** — all generated UI must pass accessibility checks; screen-reader path must be verified by a human reviewer.
+- **Feature branch** — all changes on a named branch; reviewed via PR before merging to `main`, per the [Defra SDS Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+- **No bespoke UI without sign-off** — custom components not covered by the GOV.UK Design System must be explicitly approved before being shipped.
+
+### [Defra SDS Alignment](https://defra.github.io/software-development-standards/guides/github_copilot/)
+
+Follows the [Defra SDS GitHub Copilot Guide](https://defra.github.io/software-development-standards/guides/github_copilot/), [Common Coding Standards](https://defra.github.io/software-development-standards/standards/common_coding_standards/), [Security Standards](https://defra.github.io/software-development-standards/standards/security_standards/), and [Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+
 ## References
-- Design System: https://design-system.service.gov.uk/
 - Components: https://design-system.service.gov.uk/components/
 - Patterns: https://design-system.service.gov.uk/patterns/
 - Service Standard: https://www.gov.uk/service-manual/service-standard
 - Content style guide: https://www.gov.uk/guidance/style-guide
 - WCAG 2.2: https://www.w3.org/TR/WCAG22/
+- [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/)
+- [Defra SDS — Common coding standards](https://defra.github.io/software-development-standards/standards/common_coding_standards/)
+- [Defra SDS — Security standards](https://defra.github.io/software-development-standards/standards/security_standards/)
+- [Defra SDS — Git branching strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/)
+- [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai)
+- [Defra AI Toolkit — Security guidance](https://digital.defra.gov.uk/ai-toolkit/guidance/security)
+- [Defra AI Config Examples — Agents guide](https://github.com/DEFRA/defra-ai-config-examples/blob/main/pages/agents/index.md)

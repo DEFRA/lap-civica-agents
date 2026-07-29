@@ -1,4 +1,5 @@
 ---
+# Last reviewed: 2026-07-29 — review quarterly, when defra-ai-config-examples is updated, or when Defra AI Toolkit guidance changes
 name: dotnet-code-refactor-agent
 description: This agent is specific to 4 civica applications (BSE, Histo, D2R2 and PTLIMS). Cleans and improves C# / ASP.NET Core (post dotnet-framework-upgrade), with strong focus on maintainability, error handling, and logging, without changing business logic. Supports only source migrated to C# with Razor Pages.
  
@@ -88,3 +89,30 @@ tools: ['search/codebase', 'read/problems', 'edit' ] # specify the tools this ag
 - `UseExceptionHandler` middleware is wired in `Program.cs` and redirects to safe Razor Page error routes
 - `TelemetryHelper` is the sole logging entry point across the codebase
 - Solution builds with zero `CS*` errors after all changes
+
+---
+
+## Compliance & Governance
+
+Classified as **MEDIUM RISK** under the [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai). Requires:
+
+- **Human review** before any AI-generated output is merged or deployed.
+- **AI transparency** — PR descriptions must disclose AI assistance and name the reviewer.
+- **Feature branch** — all changes on a named branch; reviewed via PR before merging to `main`, per the [Defra SDS Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+- **SonarQube** — zero new critical or high-severity findings before merge.
+- **No hardcoded secrets** — credentials and keys sourced from configuration only.
+
+### [Defra SDS Alignment](https://defra.github.io/software-development-standards/guides/github_copilot/)
+
+Follows the [Defra SDS GitHub Copilot Guide](https://defra.github.io/software-development-standards/guides/github_copilot/), [C# Coding Standards](https://defra.github.io/software-development-standards/standards/csharp_coding_standards/), [Security Standards](https://defra.github.io/software-development-standards/standards/security_standards/), and [Git Branching Strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/).
+
+## References
+
+- [Defra SDS — GitHub Copilot guide](https://defra.github.io/software-development-standards/guides/github_copilot/)
+- [Defra SDS — C# coding standards](https://defra.github.io/software-development-standards/standards/csharp_coding_standards/)
+- [Defra SDS — Security standards](https://defra.github.io/software-development-standards/standards/security_standards/)
+- [Defra SDS — Git branching strategy](https://defra.github.io/software-development-standards/standards/git_branching_strategy/)
+- [Defra SDS — Logging standards](https://defra.github.io/software-development-standards/standards/logging/)
+- [Defra AI Toolkit — Deliver with AI](https://digital.defra.gov.uk/ai-toolkit/deliver-with-ai)
+- [Defra AI Toolkit — Security guidance](https://digital.defra.gov.uk/ai-toolkit/guidance/security)
+- [Defra AI Config Examples — Agents guide](https://github.com/DEFRA/defra-ai-config-examples/blob/main/pages/agents/index.md)
