@@ -12,20 +12,18 @@ Compatible with: GitHub Copilot, Claude Code, Codex CLI, Gemini CLI, Cursor, Win
 
 | Domain | Count | Agents |
 |---|---|---|
-| Azure Infrastructure | 4 | Azure Infrastructure, Azure Infra Analyser, Azure Infra Planner, Azure Infra Implementer |
+| Database & Data Integration | 2 | Database Migration, SSIS to ADF Migration |
 | DevOps & CI/CD | 1 | DevOps Pipeline Modernizer |
-| Database & Data Integration | 2 | Database Migration Architect, SSIS to ADF Migration |
-| .NET Application Modernisation | 6 | VB.NET→C# MVC Modernizer, .NET Framework Upgrade, .NET Upgrade, Code Refactor, Service Modernisation (WCF/ASMX→REST), Windows Service to Lambda |
-| Identity & Authentication | 3 | Identity Migration Orchestrator, SAML Sub-Agent, OIDC Sub-Agent |
-| Reporting | 2 | PDF Report Modernizer, PDF Migration Orchestrator |
 | Documentation | 1 | Documentation LLD |
-| Testing & Quality | 3 | .NET Test Automation, Playwright Tester, E2E Baseline Orchestrator |
+| .NET Application Modernisation | 4 | .NET Framework Upgrade, Code Refactor, Service Modernisation (WCF/ASMX→REST), Windows Service to Lambda |
+| Identity & Authentication | 3 | Identity Migration Orchestrator, SAML Sub-Agent, OIDC Sub-Agent |
+| PDF & Reporting | 6 | PDF Report Modernizer, PDF Migration Orchestrator, PDF Discovery, PDF Infrastructure, PDF Report Converter, PDF Validation |
+| Testing & Quality | 9 | .NET Test Automation, Playwright Tester, E2E Baseline Orchestrator, E2E Page Discovery, E2E Selector Extractor, E2E Scenario Synthesiser, E2E Test Generator, E2E Runner, E2E Validator |
 | Security | 1 | Security Code Analysis |
 | Project Management | 1 | Requirements to Scrum Board |
 | Utilities | 1 | GraphAPI Send Mail |
 | UI Compliance | 1 | GDS UI Compliance |
-| Repository Governance | 1 | Repo Compliance Gatekeeper |
-| **Total** | **27** | |
+| **Total** | **30** | |
 
 ## Available Agents
 
